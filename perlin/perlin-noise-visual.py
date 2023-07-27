@@ -4,7 +4,7 @@ from mayavi import mlab
 
 # Read the Perlin noise data from the CSV file
 x_coords, y_coords, z_coords, noise_values = [], [], [], []
-with open('perlin_noise_data.csv', newline='') as csvfile:
+with open('perlin-noise-data.csv', newline='') as csvfile:
     reader = csv.reader(csvfile)
     next(reader)  # Skip the header row
     for row in reader:
