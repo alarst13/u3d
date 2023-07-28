@@ -10,7 +10,7 @@ Follow the steps below to install and run the necessary commands:
    cargo install cargo-binstall
    ```
 
-2. Once `cargo-binstall` is installed, run the following to nstall `maturin`:
+2. Once `cargo-binstall` is installed, run the following command to install `maturin`:
    ```bash
    cargo binstall maturin
    ```
