@@ -10,8 +10,13 @@ Follow the steps below to install and run the necessary commands:
    cargo install cargo-binstall
    ```
 
-2. Once `cargo-binstall` is installed, navigate to the `rust/perlin` directory:
-3. In the `rust/perlin` directory, run the following command:
+2. Once `cargo-binstall` is installed, run the following to nstall `maturin`:
+   ```bash
+   cargo binstall maturin
+   ```
+
+4. Then, navigate to the `rust/perlin` directory:
+5. In the `rust/perlin` directory, run the following command:
    ```bash
    maturin develop
    ```
