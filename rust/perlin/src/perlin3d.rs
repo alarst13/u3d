@@ -68,8 +68,32 @@ fn grad(hash: usize, x: f64, y: f64, z: f64) -> f64 {
     (if (h & 1) == 0 { u } else { -u }) + (if (h & 2) == 0 { v } else { -v })
 }
 
+// // An alternate implementation of the grad function.
+// // Source: http://riven8192.blogspot.com/2010/08/calculate-perlinnoise-twice-as-fast.html
+// fn grad(hash: usize, x: f64, y: f64, z: f64) -> f64 {
+//     match hash & 0xF {
+//         0x0 => x + y,
+//         0x1 => -x + y,
+//         0x2 => x - y,
+//         0x3 => -x - y,
+//         0x4 => x + z,
+//         0x5 => -x + z,
+//         0x6 => x - z,
+//         0x7 => -x - z,
+//         0x8 => y + z,
+//         0x9 => -y + z,
+//         0xA => y - z,
+//         0xB => -y - z,
+//         0xC => y + x,
+//         0xD => -y + z,
+//         0xE => y - x,
+//         0xF => -y - z,
+//         _ => unreachable!(), // This case should never happen
+//     }
+// }
+
 fn inc(mut num: usize) -> usize {
-    num = num +1;
+    num = num + 1;
     if REPEAT > 0.0 {
         num %= REPEAT as usize;
     }
@@ -129,7 +153,15 @@ fn perlin(mut x: f64, mut y: f64, mut z: f64) -> f64 {
 }
 
 // The perlin function with three-dimensional coordinates and multiple octaves
-fn perlin_with_octaves(x: f64, y: f64, t: f64, num_octaves: usize, wavelength_x: f64, wavelength_y: f64, wavelength_z: f64) -> f64 {
+pub fn perlin_with_octaves(
+    x: f64,
+    y: f64,
+    t: f64,
+    num_octaves: usize,
+    wavelength_x: f64,
+    wavelength_y: f64,
+    wavelength_z: f64,
+) -> f64 {
     let mut noise = 0.0;
 
     for l in 0..num_octaves {
@@ -146,7 +178,7 @@ fn perlin_with_octaves(x: f64, y: f64, t: f64, num_octaves: usize, wavelength_x:
 #[cfg(test)]
 mod tests {
     use super::perlin_with_octaves;
-    use std::{io::Write, fs::File};
+    use std::{fs::File, io::Write};
 
     #[test]
     fn test_perlin_noise_generation() {
@@ -155,7 +187,9 @@ mod tests {
         let step_size = 0.1;
 
         // Open the output file
-        let mut file = File::create("perlin-noise-3d-data.csv").expect("Failed to create file");
+        let mut file =
+            File::create("/home/ala22014/u3d/python/perlin/tests/perlin-noise-3d-data.csv")
+                .expect("Failed to create file");
 
         // Write the header row to the CSV file
         writeln!(file, "x,y,z,perlin_value").expect("Failed to write to file");
@@ -171,7 +205,7 @@ mod tests {
                         8,
                         4.0,
                         2.0,
-                        8.0
+                        8.0,
                     );
                     let line = format!("{},{},{},{}", x, y, z, perlin_value);
                     writeln!(file, "{}", line).expect("Failed to write to file");
