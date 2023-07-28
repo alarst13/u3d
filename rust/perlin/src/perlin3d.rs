@@ -131,14 +131,11 @@ fn perlin(mut x: f64, mut y: f64, mut z: f64) -> f64 {
 // The perlin function with three-dimensional coordinates and multiple octaves
 fn perlin_with_octaves(x: f64, y: f64, t: f64, num_octaves: usize, wavelength_x: f64, wavelength_y: f64, wavelength_z: f64) -> f64 {
     let mut noise = 0.0;
-    let mut frequency_x = 1.0;
-    let mut frequency_y = 1.0;
-    let mut frequency_z = 1.0;
 
     for l in 0..num_octaves {
-        frequency_x *= 2.0_f64.powf(l as f64) / wavelength_x;
-        frequency_y *= 2.0_f64.powf(l as f64) / wavelength_y;
-        frequency_z *= 2.0_f64.powf(l as f64) / wavelength_z;
+        let frequency_x = 2.0_f64.powf(l as f64) / wavelength_x;
+        let frequency_y = 2.0_f64.powf(l as f64) / wavelength_y;
+        let frequency_z = 2.0_f64.powf(l as f64) / wavelength_z;
 
         noise += perlin(x * frequency_x, y * frequency_y, t * frequency_z);
     }
