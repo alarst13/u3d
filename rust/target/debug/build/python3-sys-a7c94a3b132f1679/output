@@ -1,0 +1,16 @@
+cargo:rerun-if-env-changed=PYTHON_SYS_EXECUTABLE
+cargo:rerun-if-env-changed=CARGO_FEATURE_EXTENSION_MODULE
+cargo:rerun-if-env-changed=CARGO_FEATURE_LINK_MODE_DEFAULT
+cargo:rerun-if-env-changed=CARGO_FEATURE_LINK_MODE_UNRESOLVED_STATIC
+cargo:rustc-link-lib=static=python3.10
+cargo:rustc-link-search=native=/home/ala22014/anaconda3/lib
+cargo:rerun-if-env-changed=CARGO_FEATURE_PEP_384
+cargo:rustc-cfg=Py_3_4
+cargo:rustc-cfg=Py_3_5
+cargo:rustc-cfg=Py_3_6
+cargo:rustc-cfg=Py_3_7
+cargo:rustc-cfg=Py_3_8
+cargo:rustc-cfg=Py_3_9
+cargo:rustc-cfg=Py_3_10
+cargo:python_flags=
+cargo:python_interpreter=/home/ala22014/anaconda3/bin/python
