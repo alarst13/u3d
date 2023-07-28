@@ -2,7 +2,7 @@ This repository provides an implementation for the paper [Universal 3-Dimensiona
 
 ## Setup Instructions
 
-Follow the steps below to install and run the necessary commands:
+To create Rust bindings for the Perlin noise library and use them in Python, follow these steps:
 
 1. If you don't have `cargo-binstall` installed, run the following command to install it:
 
@@ -15,8 +15,8 @@ Follow the steps below to install and run the necessary commands:
    cargo binstall maturin
    ```
 
-4. Then, navigate to the `rust/perlin` directory.
-5. In the `rust/perlin` directory, run the following command:
+3. Then, navigate to the `rust/perlin` directory.
+4. In the `rust/perlin` directory, run the following command:
    ```bash
    maturin develop
    ```
