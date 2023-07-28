@@ -1,3 +1,6 @@
+// Perlin noise implementation inspired by Adrian Biagioli's C# version.
+// Original blog post: https://adrianb.io/2014/08/09/perlinnoise.html
+
 const REPEAT: f64 = 0.0;
 
 /*
