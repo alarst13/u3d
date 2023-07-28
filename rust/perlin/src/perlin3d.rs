@@ -170,7 +170,7 @@ mod tests {
                         z as f64 * step_size,
                         8,
                         4.0,
-                        1.0,
+                        2.0,
                         8.0
                     );
                     let line = format!("{},{},{},{}", x, y, z, perlin_value);
