@@ -1,10 +1,10 @@
 implementation=CPython
-version=3.11
+version=3.10
 shared=true
 abi3=false
-lib_name=python3.11
-lib_dir=/home/ala22014/anaconda3/envs/u3d/lib
-executable=/home/ala22014/anaconda3/envs/u3d/bin/python
+lib_name=python3.10
+lib_dir=/home/ala22014/anaconda3/lib
+executable=/home/ala22014/anaconda3/bin/python
 pointer_width=64
 build_flags=
 suppress_build_script_link_lines=false
