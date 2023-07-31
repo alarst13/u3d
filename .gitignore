@@ -1,3 +1,4 @@
 rust/target
 rust/Cargo.lock
 python/perlin-tests/nature.mp4
+python/perlin-tests/nature-noise.mp4
