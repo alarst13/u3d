@@ -152,6 +152,12 @@ fn perlin(mut x: f64, mut y: f64, mut z: f64) -> f64 {
     (lerp(y1, y2, w) + 1.0) / 2.0
 }
 
+// Sine color map function
+fn sine_map(value: f64, color_period: f64) -> f64 {
+    let mapped_value = (value * 2.0 * std::f64::consts::PI / color_period).sin();
+    mapped_value
+}
+
 // The perlin function with three-dimensional coordinates and multiple octaves
 pub fn perlin_with_octaves(
     x: f64,
@@ -161,6 +167,7 @@ pub fn perlin_with_octaves(
     wavelength_x: f64,
     wavelength_y: f64,
     wavelength_z: f64,
+    color_period: f64,
 ) -> f64 {
     let mut noise = 0.0;
 
@@ -171,6 +178,9 @@ pub fn perlin_with_octaves(
 
         noise += perlin(x * frequency_x, y * frequency_y, t * frequency_z);
     }
+
+    // Apply sine color map
+    noise = sine_map(noise, color_period);
 
     noise
 }
@@ -188,7 +198,7 @@ mod tests {
 
         // Open the output file
         let mut file =
-            File::create("/home/ala22014/u3d/python/perlin/tests/perlin-noise-3d-data.csv")
+            File::create("/home/ala22014/u3d/python/perlin-tests/perlin-noise-3d-data.csv")
                 .expect("Failed to create file");
 
         // Write the header row to the CSV file
@@ -206,6 +216,7 @@ mod tests {
                         4.0,
                         2.0,
                         8.0,
+                        2.0,
                     );
                     let line = format!("{},{},{},{}", x, y, z, perlin_value);
                     writeln!(file, "{}", line).expect("Failed to write to file");
