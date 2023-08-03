@@ -1,3 +1,0 @@
-[submodule "python/pytorch-video-recognition"]
-	path = python/pytorch-video-recognition
-	url = https://github.com/jfzhang95/pytorch-video-recognition.git

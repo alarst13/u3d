@@ -2,3 +2,7 @@ rust/target
 rust/Cargo.lock
 python/perlin-tests/nature.mp4
 python/perlin-tests/nature-noise.mp4
+.vscode
+python/video-classification/pretrained
+python/video-classification/network/__pycache__
+python/video-classification/__pycache__
