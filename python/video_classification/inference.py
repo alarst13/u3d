@@ -6,6 +6,7 @@ import cv2
 torch.backends.cudnn.benchmark = True
 
 def center_crop(frame):
+    # In the C3D architecture, the input frames are 112x112
     frame = frame[8:120, 30:142, :]
     return np.array(frame).astype(np.uint8)
 

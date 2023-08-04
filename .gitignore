@@ -1,8 +1,10 @@
 rust/target
 rust/Cargo.lock
-python/perlin-tests/nature.mp4
-python/perlin-tests/nature-noise.mp4
-.vscode
-python/video-classification/pretrained
-python/video-classification/network/__pycache__
-python/video-classification/__pycache__
+
+python/video_classification/pretrained/c3d-pretrained.pth
+python/video_classification/__pycache__
+python/video_classification/network/__pycache__
+
+python/perlin-tests/.vscode
+python/perlin-tests
+python/perlin-tests/noisy_video.avi
