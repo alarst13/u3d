@@ -1,10 +1,8 @@
 rust/target
 rust/Cargo.lock
-
+.vscode
 python/video_classification/pretrained/c3d-pretrained.pth
 python/video_classification/__pycache__
 python/video_classification/network/__pycache__
-
-python/perlin-tests/.vscode
-python/perlin-tests
-python/perlin-tests/noisy_video.avi
+python/noise_perturbation/__pycache__
+python/noise_perturbation/perturbed_video.avi
