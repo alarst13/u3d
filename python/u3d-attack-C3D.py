@@ -3,7 +3,7 @@ import os
 import numpy as np
 import cv2
 from video_classification.mypath import Path
-from noise_perturbation.perlin_noise import perturb_video_perlin as perturb_video
+from noise_perturbation.perlin_noise import perturb_video
 from video_classification.network import C3D_model
 from pyswarm import pso
 torch.backends.cudnn.benchmark = True

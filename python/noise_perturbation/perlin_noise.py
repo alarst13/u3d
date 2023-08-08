@@ -2,11 +2,11 @@ from perlin import perlin_noise
 import cv2
 import numpy as np
 
+# TODO: Optimize the Perlin noise generation to accept vectorized inputs
 # Generate Perlin noise for the first T frames of the video
 def generate_noise(T, frame_height, frame_width, num_octaves, wavelength_x, wavelength_y, wavelength_t, color_period):
     # Create a 3D array to store the noise values for each (x, y, t) in the frame
-    noise_values_3D = [[[0 for _ in range(frame_width)] for _ in range(
-        frame_height)] for _ in range(T)]
+    noise_values_3D = np.zeros((T, frame_height, frame_width))
 
     # Calculate the Perlin noise for each (x, y) in the frame
     for frame_num in range(T):
@@ -18,24 +18,15 @@ def generate_noise(T, frame_height, frame_width, num_octaves, wavelength_x, wave
     return noise_values_3D
 
 
-# Add Perlin noise to each pixel in the frame
-def add_perlin_noise_to_frame(frame, frame_noise_values):
-    frame_height, frame_width = frame.shape[:2]
-
-    # Calculate the Perlin noise for each pixel in the frame
-    for y in range(frame_height):
-        for x in range(frame_width):
-            noise_value = frame_noise_values[y][x]
-
-            # Apply Perlin noise to each color channel (R, G, B)
-            for c in range(frame.shape[2]):
-                frame[y][x][c] = np.clip(frame[y][x][c] + noise_value, 0, 255)
-
-    return frame
+# Add Perlin noise to a frame using precomputed noise values
+def add_perlin_noise_to_frame(frame, noise_values):
+    noisy_frame = frame + noise_values[:, :, np.newaxis]
+    return np.clip(noisy_frame, 0, 255).astype(np.uint8)
 
 
 # Process the entire video and add Perlin noise to each frame
-def process_video(num_octaves, wavelength_x, wavelength_y, wavelength_t, color_period, T, input_video_path, output_video_path):
+# T: Number of frames for Perlin noise generation (adjust as needed)
+def perturb_video(num_octaves, wavelength_x, wavelength_y, wavelength_t, color_period, T, input_video_path, output_video_path):
     cap = cv2.VideoCapture(input_video_path)
     if not cap.isOpened():
         print("Error opening video stream or file")
@@ -78,10 +69,21 @@ def process_video(num_octaves, wavelength_x, wavelength_y, wavelength_t, color_p
     writer.release()
 
     print("Perlin noise added to video successfully!")
+    
+    return output_video_path
 
 
-# T: Number of frames for Perlin noise generation (adjust as needed)
-def perturb_video_perlin(num_octaves, wavelength_x, wavelength_y, wavelength_t, color_period, T, input_video_path, output_video_path):
-    # Process the video and generate Perlin noise
-    process_video(num_octaves, wavelength_x, wavelength_y, wavelength_t,
-                  color_period, T, input_video_path, output_video_path)
+if __name__ == '__main__':
+    # Parameters for noise generation
+    num_octaves = 2
+    wavelength_x = 16.0
+    wavelength_y = 16.0
+    wavelength_t = 8.0
+    color_period = 2.0
+    # Number of frames for Perlin noise generation (adjust as needed)
+    T = 5
+    input_video_path = '/mnt/data/UCF-101/Biking/v_Biking_g03_c04.avi'
+    output_video_path = 'python/noise_perturbation/v_Biking_perturbed.avi'
+
+    perturb_video(num_octaves, wavelength_x, wavelength_y,
+                         wavelength_t, color_period, T, input_video_path, output_video_path)
