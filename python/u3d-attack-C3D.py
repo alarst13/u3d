@@ -37,31 +37,22 @@ def intermediate_features(model, clip):
 
 
 # Maximize the distance between original and perturbed videos
-def attack_objective(model, alpha, input_video_path, output_video_path):
-    features_original = {} 
-    features_perturbed = {} 
-    
-    # Perturb the video if it has not been perturbed yet
-    if not os.path.exists(output_video_path):
-        # Parameters for noise generation
-        num_octaves = 2
-        wavelength_x = 16.0
-        wavelength_y = 16.0
-        wavelength_t = 8.0
-        color_period = 2.0
-        # Number of frames for Perlin noise generation (adjust as needed)
-        T = 5
-        perturbed_video = perturb_video(num_octaves, wavelength_x, wavelength_y,
-                                        wavelength_t, color_period, T, input_video_path, output_video_path)
-    else:
-        perturbed_video = output_video_path
+def attack_objective(model, alpha, input_video_path, output_video_path, params):
+    features_original = {}
+    features_perturbed = {}
+
+    # Parameters for noise generation
+    num_octaves, wavelength_x, wavelength_y, wavelength_t, color_period = params
+    # Number of frames for Perlin noise generation (adjust as needed)
+    T = 5
+    perturbed_video = perturb_video(num_octaves, wavelength_x, wavelength_y,
+                                    wavelength_t, color_period, T, input_video_path, output_video_path)
 
     cap_original = cv2.VideoCapture(input_video_path)
     cap_perturbed = cv2.VideoCapture(perturbed_video)
 
     clip_original = []
     clip_perturbed = []
-    num = 0
     distances = []
 
     # Loop through frames in the videos
@@ -84,7 +75,6 @@ def attack_objective(model, alpha, input_video_path, output_video_path):
         clip_perturbed.append(tmp_perturbed)
 
         if len(clip_original) == 16 and len(clip_perturbed) == 16:
-            num += 1
             features_original = intermediate_features(
                 model, clip_original)
             features_perturbed = intermediate_features(
@@ -105,15 +95,38 @@ def attack_objective(model, alpha, input_video_path, output_video_path):
     cap_perturbed.release()
 
     total_distance = sum(distances)
+    total_distance = total_distance.detach().cpu().item()
+    
+    print("Params:", params)
+    print("Total distance:", total_distance)
 
     return total_distance
 
 
 if __name__ == '__main__':
-    # Load the pre-trained C3D model
     print('Device: {}'.format(device))
+
+    # Load the pre-trained C3D model
     model = C3D_model.C3D(num_classes=101, pretrained=True)
     model.to(device)
     model.eval()
 
-    print(attack_objective(model, 0.5, Path.video(), Path.perturbed_video()))
+    lb = [1,  # num_octaves
+          5.0,  # wavelength_x
+          5.0,  # wavelength_y
+          2.0,  # wavelength_t
+          2.0]   # color_period
+    ub = [10,  # num_octaves
+          20.0,  # wavelength_x
+          20.0,  # wavelength_y
+          10.0,  # wavelength_t
+          5.0]   # color_period
+
+    def objective_function(params):
+        params = [round(p) if i == 0 else p for i, p in enumerate(params)]
+        total_distance = attack_objective(
+            model, 0.5, Path.video(), Path.perturbed_video(), params)
+        return -total_distance
+
+    # Run PSO optimization
+    best_params, _ = pso(objective_function, lb, ub, debug=True)

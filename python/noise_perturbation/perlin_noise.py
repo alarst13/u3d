@@ -68,7 +68,7 @@ def perturb_video(num_octaves, wavelength_x, wavelength_y, wavelength_t, color_p
     cap.release()
     writer.release()
 
-    print("Perlin noise added to video successfully!")
+    # print("Perlin noise added to video successfully!")
     
     return output_video_path
 
