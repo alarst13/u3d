@@ -224,6 +224,7 @@ mod tests {
                         2.0,
                         8.0,
                         2.0,
+                        8.0,
                     );
                     let line = format!("{},{},{},{}", x, y, z, perlin_value);
                     writeln!(file, "{}", line).expect("Failed to write to file");
