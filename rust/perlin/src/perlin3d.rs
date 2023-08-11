@@ -168,6 +168,7 @@ pub fn perlin_with_octaves(
     wavelength_y: f64,
     wavelength_z: f64,
     color_period: f64,
+    epsilon: f64,
 ) -> f64 {
     let mut noise = 0.0;
 
@@ -181,6 +182,12 @@ pub fn perlin_with_octaves(
 
     // Apply sine color map
     noise = sine_map(noise, color_period);
+
+    // Scale to the range [0, 1]
+    noise = (noise + 1.0) / 2.0;
+
+    // Scale to the range [0, 10]
+    noise *= epsilon;
 
     noise
 }

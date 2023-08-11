@@ -2,9 +2,10 @@ from perlin import perlin_noise
 import cv2
 import numpy as np
 
+
 # TODO: Optimize the Perlin noise generation to accept vectorized inputs
 # Generate Perlin noise for the first T frames of the video
-def generate_noise(T, frame_height, frame_width, num_octaves, wavelength_x, wavelength_y, wavelength_t, color_period):
+def generate_noise(T, frame_height, frame_width, num_octaves, wavelength_x, wavelength_y, wavelength_t, color_period, epsilon):
     # Create a 3D array to store the noise values for each (x, y, t) in the frame
     noise_values_3D = np.zeros((T, frame_height, frame_width))
 
@@ -13,7 +14,7 @@ def generate_noise(T, frame_height, frame_width, num_octaves, wavelength_x, wave
         for y in range(frame_height):
             for x in range(frame_width):
                 noise_value = perlin_noise(
-                    x, y, frame_num, num_octaves, wavelength_x, wavelength_y, wavelength_t, color_period)
+                    x, y, frame_num, num_octaves, wavelength_x, wavelength_y, wavelength_t, color_period, epsilon)
                 noise_values_3D[frame_num][y][x] = noise_value
     return noise_values_3D
 
@@ -26,7 +27,7 @@ def add_perlin_noise_to_frame(frame, noise_values):
 
 # Process the entire video and add Perlin noise to each frame
 # T: Number of frames for Perlin noise generation (adjust as needed)
-def perturb_video(num_octaves, wavelength_x, wavelength_y, wavelength_t, color_period, T, input_video_path, output_video_path):
+def perturb_video(num_octaves, wavelength_x, wavelength_y, wavelength_t, color_period, T, epsilon, input_video_path, output_video_path):
     cap = cv2.VideoCapture(input_video_path)
     if not cap.isOpened():
         print("Error opening video stream or file")
@@ -37,9 +38,6 @@ def perturb_video(num_octaves, wavelength_x, wavelength_y, wavelength_t, color_p
     frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
-    # Get the total number of frames in the video
-    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-
     # Prepare the output video writer
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
     writer = cv2.VideoWriter(output_video_path, fourcc,
@@ -49,8 +47,8 @@ def perturb_video(num_octaves, wavelength_x, wavelength_y, wavelength_t, color_p
     frame_num = 0
     # Generate the Perlin noise for the first T frames
     noise_values_3D = generate_noise(
-        T, frame_height, frame_width, num_octaves, wavelength_x, wavelength_y, wavelength_t, color_period)
-    while frame_num < total_frames:
+        T, frame_height, frame_width, num_octaves, wavelength_x, wavelength_y, wavelength_t, color_period, epsilon)
+    while True:
         ret, frame = cap.read()
         if not ret:
             break
@@ -68,22 +66,22 @@ def perturb_video(num_octaves, wavelength_x, wavelength_y, wavelength_t, color_p
     cap.release()
     writer.release()
 
-    # print("Perlin noise added to video successfully!")
-    
+    print("Perlin noise added to video successfully!")
+
     return output_video_path
 
 
 if __name__ == '__main__':
     # Parameters for noise generation
-    num_octaves = 2
-    wavelength_x = 16.0
-    wavelength_y = 16.0
-    wavelength_t = 8.0
-    color_period = 2.0
-    # Number of frames for Perlin noise generation (adjust as needed)
-    T = 5
+    num_octaves = 5
+    wavelength_x = 2.0
+    wavelength_y = 180.0
+    wavelength_t = 49.35137797
+    color_period = 1.0
+    T = 5  # Number of frames for Perlin noise generation (adjust as needed)
+    epsilon = 8.0  # Maximum perturbation allowed (epsilon) for the U3D attack
     input_video_path = '/mnt/data/UCF-101/Biking/v_Biking_g03_c04.avi'
-    output_video_path = 'python/noise_perturbation/v_Biking_perturbed.avi'
+    output_video_path = 'python/noise_perturbation/perturbed_video.avi'
 
     perturb_video(num_octaves, wavelength_x, wavelength_y,
-                         wavelength_t, color_period, T, input_video_path, output_video_path)
+                  wavelength_t, color_period, T, epsilon, input_video_path, output_video_path)

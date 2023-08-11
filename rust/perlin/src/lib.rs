@@ -17,6 +17,7 @@ fn perlin_noise(
     wavelength_y: f64,
     wavelength_z: f64,
     color_period: f64,
+    epsilon: f64,
 ) -> PyResult<f64> {
     Ok(perlin_with_octaves(
         x,
@@ -27,6 +28,7 @@ fn perlin_noise(
         wavelength_y,
         wavelength_z,
         color_period,
+        epsilon
     ))
 }
 
