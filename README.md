@@ -1,51 +1,61 @@
-This repository provides an implementation for the paper [Universal 3-Dimensional Perturbations for Black-Box Attacks on Video Recognition Systems](https://arxiv.org/pdf/2107.04284.pdf).
-
 ## Setup Instructions
 
-This repository provides an implementation for the paper [Universal 3-Dimensional Perturbations for Black-Box Attacks on Video Recognition Systems](https://arxiv.org/pdf/2107.04284.pdf).
+This guide provides step-by-step instructions to set up the environment and use the implementation for the paper [Universal 3-Dimensional Perturbations for Black-Box Attacks on Video Recognition Systems](https://arxiv.org/pdf/2107.04284.pdf).
 
-## Setup Instructions
+### 1. Install Anaconda
 
-To use the provided implementation, you'll need to set up Rust bindings for the Perlin noise library and ensure you have Anaconda installed. Follow these steps:
+Begin by installing [Anaconda](https://www.anaconda.com/download) and then navigate to the desired conda environment:
 
-### 1. Install Rust
+```bash
+conda activate <YOUR-ENVIRONMENT>
+```
 
-Rust is required to build the Rust bindings for the Perlin noise library. If you don't have Rust installed, you can do so by following these steps:
+### 2. Install Rust
 
-#### Install Rust using Rustup
+Install Rust by executing the following commands:
 
-1. Visit the official Rust website: [https://www.rust-lang.org/tools/install](https://www.rust-lang.org/tools/install)
-2. Follow the installation instructions based on your operating system.
+```bash
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+source .bashrc
+source "$HOME/.cargo/env"
+```
 
-### 2. Install Anaconda
+### 3. Clone the Repository
 
-Anaconda provides a convenient way to manage environments and dependencies. If you don't have Anaconda installed, you can do so by following these steps:
+Clone the repository by running:
 
-#### Install Anaconda
+```bash
+git clone https://github.com/alarst13/u3d
+```
 
-1. Visit the official Anaconda website: [https://www.anaconda.com/products/distribution](https://www.anaconda.com/products/distribution)
-2. Download and install Anaconda based on your operating system.
-3. Open a terminal and create a new Anaconda environment by running:
-   ```bash
-   conda create -n perlin python=3.10
-
-### 2. Install Anaconda
+### 4. Create Rust Bindings
 
 To create Rust bindings for the Perlin noise library and use them in Python, follow these steps:
 
-1. If you don't have `cargo-binstall` installed, run the following command to install it:
+1. Install `cargo-binstall`:
 
    ```bash
    cargo install cargo-binstall
    ```
 
-2. Once `cargo-binstall` is installed, run the following command to install `maturin`:
+2. Install `maturin` using `cargo-binstall`:
+
    ```bash
    cargo binstall maturin
    ```
 
-3. Then, navigate to the `rust/perlin` directory.
-4. In the `rust/perlin` directory, run the following command:
+3. Navigate to the `rust/perlin` directory.
+
+4. Build the Rust bindings using `maturin`:
+
    ```bash
    maturin develop
    ```
+
+### 5. Run the Attack
+
+For this step, work within the `python/` subdirectory:
+
+```bash
+python u3d-attack-C3D.py
+```
