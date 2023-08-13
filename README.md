@@ -73,9 +73,3 @@ cd ../python
 ```bash
 python u3d-attack-C3D.py
 ```
-
-These instructions provide a clear path to set up the required environment and use the provided implementation effectively. Happy experimenting!
-
----
-
-Feel free to adjust or use this version as you see fit for your documentation.
