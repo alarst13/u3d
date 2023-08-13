@@ -1,18 +1,23 @@
+# Universal 3-Dimensional Perturbations for Black-Box Video Recognition Attacks
+
+This repository contains an implementation based on the paper [Universal 3-Dimensional Perturbations for Black-Box Attacks on Video Recognition Systems](https://arxiv.org/pdf/2107.04284.pdf).
+
 ## Setup Instructions
 
-This guide provides step-by-step instructions to set up the environment and use the implementation for the paper [Universal 3-Dimensional Perturbations for Black-Box Attacks on Video Recognition Systems](https://arxiv.org/pdf/2107.04284.pdf).
+This guide outlines the steps to set up your environment and use the provided implementation effectively.
 
-### 1. Install Anaconda
+### Step 1: Install Anaconda
 
-Begin by installing [Anaconda](https://www.anaconda.com/download) and then navigate to the desired conda environment:
+1. Start by installing [Anaconda](https://www.anaconda.com/download).
+2. Activate your desired conda environment:
 
 ```bash
 conda activate <YOUR-ENVIRONMENT>
 ```
 
-### 2. Install Rust
+### Step 2: Install Rust
 
-Install Rust by executing the following commands:
+1. Install Rust by executing the following commands:
 
 ```bash
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
@@ -20,42 +25,57 @@ source .bashrc
 source "$HOME/.cargo/env"
 ```
 
-### 3. Clone the Repository
+### Step 3: Clone the Repository
 
-Clone the repository by running:
+1. Clone this repository using Git:
 
 ```bash
 git clone https://github.com/alarst13/u3d
+cd u3d
 ```
 
-### 4. Create Rust Bindings
-
-To create Rust bindings for the Perlin noise library and use them in Python, follow these steps:
+### Step 4: Create Rust Bindings
 
 1. Install `cargo-binstall`:
 
-   ```bash
-   cargo install cargo-binstall
-   ```
+```bash
+cargo install cargo-binstall
+```
 
 2. Install `maturin` using `cargo-binstall`:
 
-   ```bash
-   cargo binstall maturin
-   ```
+```bash
+cargo binstall maturin
+```
 
-3. Navigate to the `rust/perlin` directory.
+3. Navigate to the `rust/perlin` directory:
 
-4. Build the Rust bindings using `maturin`:
+```bash
+cd rust/perlin
+```
 
-   ```bash
-   maturin develop
-   ```
+4. Build the Rust bindings with `maturin`:
 
-### 5. Run the Attack
+```bash
+maturin develop
+```
 
-For this step, work within the `python/` subdirectory:
+### Step 5: Run the Attack
+
+1. For the final step, move to the `python/` subdirectory:
+
+```bash
+cd ../python
+```
+
+2. Run the attack script:
 
 ```bash
 python u3d-attack-C3D.py
 ```
+
+These instructions provide a clear path to set up the required environment and use the provided implementation effectively. Happy experimenting!
+
+---
+
+Feel free to adjust or use this version as you see fit for your documentation.
