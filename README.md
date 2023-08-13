@@ -29,8 +29,7 @@ Anaconda provides a convenient way to manage environments and dependencies. If y
    ```bash
    conda create -n perlin python=3.10
 
-### 3. Set up Rust Bindings for Perlin Noise
-
+### 2. Install Anaconda
 
 To create Rust bindings for the Perlin noise library and use them in Python, follow these steps:
 
