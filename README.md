@@ -1,4 +1,4 @@
-# Universal 3-Dimensional Perturbations for Black-Box Video Recognition Attacks
+# U3D
 
 This repository contains an implementation based on the paper [Universal 3-Dimensional Perturbations for Black-Box Attacks on Video Recognition Systems](https://arxiv.org/pdf/2107.04284.pdf).
 
