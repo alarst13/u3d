@@ -228,3 +228,4 @@ if __name__ == '__main__':
         phig=2.0,    # Scaling factor for global best
         maxiter=40,
         debug=True)
+    

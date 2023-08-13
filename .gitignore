@@ -1,6 +1,7 @@
 rust/target
 rust/Cargo.lock
 .vscode
+python/video_classification/pretrained
 python/video_classification/pretrained/c3d-pretrained.pth
 python/video_classification/__pycache__
 python/video_classification/network/__pycache__
