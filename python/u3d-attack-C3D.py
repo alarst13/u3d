@@ -66,17 +66,34 @@ def temporal_transformation(perturbation, tau_shift):
     return transformed_perturbation
 
 
-def attack_objective(model, input_video_path, params):
+def attack_objective(args, model, input_video_path, params):
     """
     Calculate the attack objective using Particle Swarm Optimization (PSO).
 
     Parameters:
-    model (torch.nn.Module): The pre-trained DNN model.
-    input_video_path (str): Path to the input video.
-    params (list): List of U3D parameters for the attack.
+        model (torch.nn.Module): The pre-trained DNN model.
+        input_video_path (str): Path to the input video.
+        params (list): List of U3D parameters for the attack.
 
     Returns:
-    float: The attack objective value.
+        float: The attack objective value.
+
+    The attack objective function maximizes the expectation over the input video frames and time steps,
+    subject to a perturbation constraint.
+
+    The optimization problem aims to maximize the sum of the distortion between the original frames and
+    the frames modified by the perturbation. The perturbation is applied based on the U3D parameters and
+    the time step. The perturbation is subject to a maximum perturbation constraint.
+
+    Mathematically:
+        max ξ: ∑_{video, time step} ∑_{dimension} Distortion(original_frame, perturbed_frame; dimension)
+        s.t. ξ = Noise(T; strength), ||ξ||_{∞} ≤ ε
+
+    Where:
+    - ξ represents the perturbation.
+    - Distortion measures the difference between frames along different dimensions.
+    - Noise(T; strength) generates noise based on the U3D parameters and time step.
+    - ε is the maximum allowed perturbation.
     """
     features_original = {}
     features_perturbed = {}
@@ -84,10 +101,10 @@ def attack_objective(model, input_video_path, params):
 
     # Parameters for noise generation
     num_octaves, wavelength_x, wavelength_y, wavelength_t, color_period = params
-    T = 5  # Number of frames for Perlin noise generation (adjust as needed)
-    epsilon = 8.0  # Maximum perturbation allowed (epsilon) for the U3D attack
-    alpha = 0.5  # The alpha parameter for power normalization
-    I = 5  # Number of iterations for sampling.
+    T = args.T  # Number of frames for Perlin noise generation
+    epsilon = args.epsilon  # Maximum perturbation allowed for the U3D attack
+    alpha = args.alpha  # The alpha parameter for power normalization
+    I = args.I  # Number of iterations for sampling.
 
     cap_original = cv2.VideoCapture(input_video_path)
 
@@ -172,7 +189,7 @@ def attack_objective(model, input_video_path, params):
     return total_distance_expectation
 
 
-def main():
+def main(args):
     print('Device: {}'.format(device))
 
     model = C3D_model.C3D(num_classes=101, pretrained=True)
@@ -195,7 +212,7 @@ def main():
             Negative total distance (PSO minimizes, so we negate for maximization).
         """
         params = [round(p) if i == 0 else p for i, p in enumerate(params)]
-        total_distance = attack_objective(model, Path.video(), params)
+        total_distance = attack_objective(args, model, Path.video(), params)
         # Negate because PSO minimizes, and we want to maximize the distance
         return -total_distance
 
@@ -212,12 +229,13 @@ def main():
 
 
 if __name__ == '__main__':
+    # Default parameters are chosen based on the paper's settings (adjust as needed).
     parser = argparse.ArgumentParser(
         description='Universal 3-Dimensional Perturbations for Black-Box Attacks')
     parser.add_argument('--lb', type=float, nargs=5, default=[1, 2.0, 2.0, 2.0, 1.0],
-                        help='Lower bounds for optimization parameters [num_octaves (int), wavelength_x, wavelength_y, wavelength_t, color_period]')
+                        help='Lower bounds for optimization parameters [num_octaves (int), wavelength_x (float), wavelength_y (float), wavelength_t (float), color_period (float)]')
     parser.add_argument('--ub', type=float, nargs=5, default=[5, 180.0, 180.0, 180.0, 60.0],
-                        help='Upper bounds for optimization parameters [num_octaves (int), wavelength_x, wavelength_y, wavelength_t, color_period]')
+                        help='Upper bounds for optimization parameters [num_octaves (int), wavelength_x (float), wavelength_y (float), wavelength_t (float), color_period (float)]')
     parser.add_argument('--swarmsize', type=int, default=20,
                         help='Size of the swarm in particle swarm optimization (PSO)')
     parser.add_argument('--omega', type=float, default=1.2,
@@ -228,6 +246,14 @@ if __name__ == '__main__':
                         help='Scaling factor for global best in particle swarm optimization (PSO)')
     parser.add_argument('--maxiter', type=int, default=40,
                         help='Maximum number of iterations in particle swarm optimization (PSO)')
+    parser.add_argument('--T', type=int, default=5,
+                        help='Number of frames for Perlin noise generation')
+    parser.add_argument('--epsilon', type=float, default=8.0,
+                        help='Maximum perturbation allowed for the U3D attack')
+    parser.add_argument('--alpha', type=float, default=0.5,
+                        help='The alpha parameter for power normalization')
+    parser.add_argument('--I', type=int, default=5,
+                        help='Number of iterations for sampling')
 
     args = parser.parse_args()
     main(args)
