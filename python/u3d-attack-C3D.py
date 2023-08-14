@@ -6,6 +6,7 @@ from noise_perturbation.perlin_noise import generate_noise
 from noise_perturbation.perlin_noise import add_perlin_noise_to_frame
 from video_classification.network import C3D_model
 from pyswarm import pso
+import argparse
 torch.backends.cudnn.benchmark = True
 device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
 
@@ -171,30 +172,12 @@ def attack_objective(model, input_video_path, params):
     return total_distance_expectation
 
 
-if __name__ == '__main__':
+def main():
     print('Device: {}'.format(device))
 
-    # Load the pre-trained C3D model
     model = C3D_model.C3D(num_classes=101, pretrained=True)
     model.to(device)
     model.eval()
-
-    # lower bouns
-    lb = [
-        1,       # num_octaves
-        2.0,     # wavelength_x
-        2.0,     # wavelength_y
-        2.0,     # wavelength_t
-        1.0      # color_period
-    ]
-    # upper bounds
-    ub = [
-        5,       # num_octaves
-        180.0,   # wavelength_x
-        180.0,   # wavelength_y
-        180.0,   # wavelength_t
-        60.0     # color_period
-    ]
 
     def objective_function(params):
         """
@@ -216,16 +199,35 @@ if __name__ == '__main__':
         # Negate because PSO minimizes, and we want to maximize the distance
         return -total_distance
 
-    # Run PSO optimization
-    # Best after iteration 40: [  5.           2.         180.          49.35137797   1.        ] -3859360.25
     best_params, _ = pso(
         objective_function,
-        lb,
-        ub,
-        swarmsize=20,
-        omega=1.2,   # Inertia weight
-        phip=2.0,    # Scaling factor for personal best
-        phig=2.0,    # Scaling factor for global best
-        maxiter=40,
+        lb=args.lb,
+        ub=args.ub,
+        swarmsize=args.swarmsize,
+        omega=args.omega,
+        phip=args.phip,
+        phig=args.phig,
+        maxiter=args.maxiter,
         debug=True)
-    
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(
+        description='Universal 3-Dimensional Perturbations for Black-Box Attacks')
+    parser.add_argument('--lb', type=float, nargs=5, default=[1, 2.0, 2.0, 2.0, 1.0],
+                        help='Lower bounds for optimization parameters [num_octaves (int), wavelength_x, wavelength_y, wavelength_t, color_period]')
+    parser.add_argument('--ub', type=float, nargs=5, default=[5, 180.0, 180.0, 180.0, 60.0],
+                        help='Upper bounds for optimization parameters [num_octaves (int), wavelength_x, wavelength_y, wavelength_t, color_period]')
+    parser.add_argument('--swarmsize', type=int, default=20,
+                        help='Size of the swarm in particle swarm optimization (PSO)')
+    parser.add_argument('--omega', type=float, default=1.2,
+                        help='Inertia weight for particle swarm optimization (PSO)')
+    parser.add_argument('--phip', type=float, default=2.0,
+                        help='Scaling factor for personal best in particle swarm optimization (PSO)')
+    parser.add_argument('--phig', type=float, default=2.0,
+                        help='Scaling factor for global best in particle swarm optimization (PSO)')
+    parser.add_argument('--maxiter', type=int, default=40,
+                        help='Maximum number of iterations in particle swarm optimization (PSO)')
+
+    args = parser.parse_args()
+    main(args)
