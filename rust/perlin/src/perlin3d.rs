@@ -195,7 +195,7 @@ pub fn perlin_with_octaves(
 #[cfg(test)]
 mod tests {
     use super::perlin_with_octaves;
-    use std::{fs::File, io::Write};
+    use std::{env, fs::File, io::Write};
 
     #[test]
     fn test_perlin_noise_generation() {
@@ -203,10 +203,14 @@ mod tests {
         let grid_size = 64;
         let step_size = 0.1;
 
+        // Get the current directory
+        let current_dir = env::current_dir().expect("Failed to get current directory");
+
+        // Construct the path to the output file in the current directory
+        let output_path = current_dir.join("perlin-noise-3d-data.csv");
+
         // Open the output file
-        let mut file =
-            File::create("/home/ala22014/u3d/python/perlin-tests/perlin-noise-3d-data.csv")
-                .expect("Failed to create file");
+        let mut file = File::create(output_path).expect("Failed to create file");
 
         // Write the header row to the CSV file
         writeln!(file, "x,y,z,perlin_value").expect("Failed to write to file");

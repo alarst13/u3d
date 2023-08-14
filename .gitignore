@@ -7,3 +7,4 @@ python/video_classification/__pycache__
 python/video_classification/network/__pycache__
 python/noise_perturbation/__pycache__
 python/noise_perturbation/perturbed_video.avi
+rust/perlin/perlin-noise-3d-data.csv
