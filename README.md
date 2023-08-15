@@ -48,13 +48,8 @@ cd u3d
 cd python
 ```
 
-2. Run the attack script with optional arguments to adjust parameters (if needed):
+2. Run the attack script without optional arguments to use default settings (to reproduce paper's results):
 
-```bash
-python u3d-attack-C3D.py --lb <lower_bounds> --ub <upper_bounds> --swarmsize <swarm_size> --omega <omega_value> --phip <phip_value> --phig <phig_value> --maxiter <max_iterations> --T <frames_for_perlin> --epsilon <max_perturbation> --alpha <alpha_value> --I <num_iterations>
-```
-
-3. **Note:** Default parameters are chosen based on the paper's settings. To reproduce the same results as in the paper, you can run the attack script without adding any optional arguments:
 ```bash
 python u3d-attack-C3D.py
 ```
@@ -78,3 +73,11 @@ If you wish to fine-tune the behavior and appearance of the perturbation during 
 - `--epsilon`: Maximum perturbation allowed for U3D attack
 - `--alpha`: Alpha parameter for power normalization
 - `--I`: Number of iterations for sampling
+
+To use the optional arguments and customize the attack parameters, run the following command:
+
+```bash
+python u3d-attack-C3D.py --lb <lower_bounds> --ub <upper_bounds> --swarmsize <swarm_size> --omega <omega_value> --phip <phip_value> --phig <phig_value> --maxiter <max_iterations> --T <frames_for_perlin> --epsilon <max_perturbation> --alpha <alpha_value> --I <num_iterations>
+```
+
+Feel free to adjust these parameters according to your requirements and desired outcomes.
