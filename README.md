@@ -61,9 +61,9 @@ If you wish to fine-tune the behavior and appearance of the perturbation during 
 **Optional Arguments:**
 
 - `--lb`: Lower bounds for optimization parameters
-  - Format: `num_octaves wavelength_x wavelength_y wavelength_t color_period`
+  - Format: `--lb num_octaves (int) wavelength_x (float) wavelength_y (float) wavelength_t (float) color_period (float)`
 - `--ub`: Upper bounds for optimization parameters
-  - Format: `num_octaves wavelength_x wavelength_y wavelength_t color_period`
+  - Format: `--lb num_octaves (int) wavelength_x (float) wavelength_y (float) wavelength_t (float) color_period (float)`
 - `--swarmsize`: Size of the swarm in particle swarm optimization (PSO)
 - `--omega`: Inertia weight for particle swarm optimization (PSO)
 - `--phip`: Scaling factor for personal best in PSO
