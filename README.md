@@ -4,8 +4,6 @@ This repository contains an implementation based on the paper [Universal 3-Dimen
 
 ## Setup Instructions
 
-This guide outlines the steps to set up your environment and use the provided implementation effectively.
-
 ### Step 1: Install Anaconda
 
 1. Start by installing [Anaconda](https://www.anaconda.com/download).
@@ -34,30 +32,12 @@ git clone https://github.com/alarst13/u3d
 cd u3d
 ```
 
-### Step 4: Create Rust Bindings
+### Step 4: Build Rust Bindings
 
-1. Install `cargo-binstall`:
-
-```bash
-cargo install cargo-binstall
-```
-
-2. Install `maturin` using `cargo-binstall`:
+1. Run `build.sh` to automatically build Rust bindings for both "pso" and "perlin" crates. This script handles the necessary commands:
 
 ```bash
-cargo binstall maturin
-```
-
-3. Navigate to the `rust/perlin` directory:
-
-```bash
-cd rust/perlin
-```
-
-4. Build the Rust bindings with `maturin`:
-
-```bash
-maturin develop
+./build.sh
 ```
 
 ### Step 5: Run the Attack
@@ -65,7 +45,7 @@ maturin develop
 1. For the final step, move to the `python/` subdirectory:
 
 ```bash
-cd ../python
+cd python
 ```
 
 2. Run the attack script:
