@@ -50,11 +50,9 @@ cd python
 
 2. Run the attack script with optional arguments to adjust parameters (if needed):
 
-<div style="overflow: auto;">
-<pre>
+'''bash
 python u3d-attack-C3D.py --lb &lt;lower_bounds&gt; --ub &lt;upper_bounds&gt; --swarmsize &lt;swarm_size&gt; --omega &lt;omega_value&gt; --phip &lt;phip_value&gt; --phig &lt;phig_value&gt; --maxiter &lt;max_iterations&gt; --T &lt;frames_for_perlin&gt; --epsilon &lt;max_perturbation&gt; --alpha &lt;alpha_value&gt; --I &lt;num_iterations&gt;
-</pre>
-</div>
+'''
 
 3. Note: Default parameters are chosen based on the paper's settings. To reproduce the same results as in the paper, you can run the attack script without adding any optional arguments:
 ```bash
