@@ -61,12 +61,24 @@ If you wish to fine-tune the behavior and appearance of the perturbation during 
 **Optional Arguments:**
 
 - `--lb`: Lower bounds for optimization parameters
-  - **Format**: `--lb num_octaves (int) wavelength_x (float) wavelength_y (float) wavelength_t (float) color_period (float)`
-  - **Example**: `--lb 1 2.0 2.0 2.0 1.0`
+  - **Format**:
+    ```
+    --lb num_octaves (int) wavelength_x (float) wavelength_y (float) wavelength_t (float) color_period (float)
+    ```
+  - **Example**:
+    ```
+    --lb 1 2.0 2.0 2.0 1.0
+    ```
 
 - `--ub`: Upper bounds for optimization parameters
-  - **Format**: `--ub num_octaves (int) wavelength_x (float) wavelength_y (float) wavelength_t (float) color_period (float)`
-  - **Example**: `--ub 5 180.0 180.0 180.0 60.0`
+  - **Format**:
+    ```
+    --ub num_octaves (int) wavelength_x (float) wavelength_y (float) wavelength_t (float) color_period (float)
+    ```
+  - **Example**:
+    ```
+    --ub 5 180.0 180.0 180.0 60.0
+    ```
 
 - `--swarmsize`: Size of the swarm in particle swarm optimization (PSO)
 - `--omega`: Inertia weight for particle swarm optimization (PSO)
@@ -77,6 +89,7 @@ If you wish to fine-tune the behavior and appearance of the perturbation during 
 - `--epsilon`: Maximum perturbation allowed for U3D attack
 - `--alpha`: Alpha parameter for power normalization
 - `--I`: Number of iterations for sampling
+
 
 
 To use the optional arguments and customize the attack parameters, run the following command:
