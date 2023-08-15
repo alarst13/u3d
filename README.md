@@ -34,7 +34,7 @@ cd u3d
 
 ### Step 4: Build Rust Bindings
 
-1. Run `build.sh` to automatically build Rust bindings for both `pso` and `perlin` crates.
+1. Run `build.sh` to automatically build Rust bindings for both `pso` and `perlin` crates:
 
 ```bash
 ./build.sh
