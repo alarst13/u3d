@@ -1,11 +1,12 @@
 import torch
 import numpy as np
+from numpy import array
 import cv2
 from video_classification.mypath import Path
 from noise_perturbation.perlin_noise import generate_noise
 from noise_perturbation.perlin_noise import add_perlin_noise_to_frame
 from video_classification.network import C3D_model
-from pyswarm import pso
+from psolib import particle_swarm_optimization as pso
 import argparse
 torch.backends.cudnn.benchmark = True
 device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
@@ -218,8 +219,8 @@ def main(args):
 
     best_params, _ = pso(
         objective_function,
-        lb=args.lb,
-        ub=args.ub,
+        lb=array(args.lb),
+        ub=array(args.ub),
         swarmsize=args.swarmsize,
         omega=args.omega,
         phip=args.phip,
