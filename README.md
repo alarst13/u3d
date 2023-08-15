@@ -58,3 +58,23 @@ python u3d-attack-C3D.py --lb <lower_bounds> --ub <upper_bounds> --swarmsize <sw
 ```bash
 python u3d-attack-C3D.py
 ```
+
+### Fine-tune the Attack (Optional)
+
+If you wish to fine-tune the behavior and appearance of the perturbation during the black-box attack, you can adjust the optional arguments. Below is a guide to these arguments:
+
+**Optional Arguments:**
+
+- `--lb`: Lower bounds for optimization parameters
+  - Format: `num_octaves wavelength_x wavelength_y wavelength_t color_period`
+- `--ub`: Upper bounds for optimization parameters
+  - Format: `num_octaves wavelength_x wavelength_y wavelength_t color_period`
+- `--swarmsize`: Size of the swarm in particle swarm optimization (PSO)
+- `--omega`: Inertia weight for particle swarm optimization (PSO)
+- `--phip`: Scaling factor for personal best in PSO
+- `--phig`: Scaling factor for global best in PSO
+- `--maxiter`: Maximum number of iterations in PSO
+- `--T`: Number of frames for Perlin noise generation
+- `--epsilon`: Maximum perturbation allowed for U3D attack
+- `--alpha`: Alpha parameter for power normalization
+- `--I`: Number of iterations for sampling
