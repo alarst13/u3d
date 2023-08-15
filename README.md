@@ -54,7 +54,7 @@ cd python
 python u3d-attack-C3D.py --lb <lower_bounds> --ub <upper_bounds> --swarmsize <swarm_size> --omega <omega_value> --phip <phip_value> --phig <phig_value> --maxiter <max_iterations> --T <frames_for_perlin> --epsilon <max_perturbation> --alpha <alpha_value> --I <num_iterations>
 ```
 
-3. Note: Default parameters are chosen based on the paper's settings. To reproduce the same results as in the paper, you can run the attack script without adding any optional arguments:
+3. **Note:** Default parameters are chosen based on the paper's settings. To reproduce the same results as in the paper, you can run the attack script without adding any optional arguments:
 ```bash
 python u3d-attack-C3D.py
 ```
