@@ -4,6 +4,8 @@ This repository contains an implementation based on the paper [Universal 3-Dimen
 
 ## Setup Instructions
 
+This guide outlines the steps to set up your environment and use the provided implementation effectively.
+
 ### Step 1: Install Anaconda
 
 1. Start by installing [Anaconda](https://www.anaconda.com/download).
