@@ -28,7 +28,7 @@ fn perlin_noise(
         wavelength_y,
         wavelength_z,
         color_period,
-        epsilon
+        epsilon,
     ))
 }
 
