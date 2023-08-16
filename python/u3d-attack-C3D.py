@@ -2,14 +2,14 @@ import torch
 import numpy as np
 from numpy import array
 import cv2
-from video_classification.mypath import Path
 from noise_perturbation.perlin_noise import generate_noise
 from noise_perturbation.perlin_noise import add_perlin_noise_to_frame
 from video_classification.network import C3D_model
 from psolib import particle_swarm_optimization as pso
+# from pyswarm import pso
 import argparse
 torch.backends.cudnn.benchmark = True
-device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
 # Define the power normalization function P(z) = sign(z) * |z|^alpha
@@ -193,9 +193,22 @@ def attack_objective(args, model, input_video_path, params):
 def main(args):
     print('Device: {}'.format(device))
 
-    model = C3D_model.C3D(num_classes=101, pretrained=True)
+    dataset = 'ucf101' if args.dataset == 'u' else 'hmdb51'
+    if dataset == 'ucf101':
+        num_classes = 101
+    elif dataset == 'hmdb51':
+        num_classes = 51
+    else:
+        raise ValueError("Unsupported dataset name")
+
+    # init model
+    model = C3D_model.C3D(num_classes=num_classes)
+    checkpoint = torch.load(args.m, map_location=lambda storage, loc: storage)
+    model.load_state_dict(checkpoint['state_dict'])
     model.to(device)
     model.eval()
+
+    video = args.v
 
     def objective_function(params):
         """
@@ -213,7 +226,7 @@ def main(args):
             Negative total distance (PSO minimizes, so we negate for maximization).
         """
         params = [round(p) if i == 0 else p for i, p in enumerate(params)]
-        total_distance = attack_objective(args, model, Path.video(), params)
+        total_distance = attack_objective(args, model, video, params)
         # Negate because PSO minimizes, and we want to maximize the distance
         return -total_distance
 
@@ -233,6 +246,12 @@ if __name__ == '__main__':
     # Default parameters are chosen based on the paper's settings (adjust as needed).
     parser = argparse.ArgumentParser(
         description='Universal 3-Dimensional Perturbations for Black-Box Attacks')
+    parser.add_argument('--v', type=str, required=True,
+                        help='Path to the input video')
+    parser.add_argument('--m', type=str, required=True,
+                        help='Path to the pretrained model')
+    parser.add_argument('--dataset', type=str, choices=[
+                        'u', 'h'], default='h', help='Dataset name: "u" for UCF101 or "h" for HMDB51')
     parser.add_argument('--lb', type=float, nargs=5, default=[1, 2.0, 2.0, 2.0, 1.0],
                         help='Lower bounds for optimization parameters [num_octaves (int), wavelength_x (float), wavelength_y (float), wavelength_t (float), color_period (float)]')
     parser.add_argument('--ub', type=float, nargs=5, default=[5, 180.0, 180.0, 180.0, 60.0],
