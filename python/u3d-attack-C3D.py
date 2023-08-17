@@ -6,7 +6,7 @@ from noise_perturbation.perlin_noise import generate_noise
 from video_classification.network import C3D_model
 import os
 from psolib import particle_swarm_optimization as pso
-from pyswarm import pso
+# from pyswarm import pso
 import argparse
 torch.backends.cudnn.benchmark = True
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
