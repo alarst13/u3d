@@ -3,49 +3,43 @@ import numpy as np
 from numpy import array
 import cv2
 from noise_perturbation.perlin_noise import generate_noise
-from noise_perturbation.perlin_noise import add_perlin_noise_to_frame
 from video_classification.network import C3D_model
 import os
-import random
-# from psolib import particle_swarm_optimization as pso
+from psolib import particle_swarm_optimization as pso
 from pyswarm import pso
 import argparse
 torch.backends.cudnn.benchmark = True
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
-def randomly_choose_video_paths(dataset_root, num_videos=1):
-    """
-    Randomly chooses video paths from a dataset folder structure.
-
-    Parameters:
-        dataset_root (str): Root directory of the dataset.
-        num_videos (int): Number of video paths to choose.
-
-    Returns:
-        list: List of randomly chosen video paths.
-    """
-    video_paths = [
+def load_preprocessed_frames(dataset_dir):
+    frame_files = [
         os.path.join(dirpath, filename)
-        for dirpath, _, filenames in os.walk(dataset_root)
+        for dirpath, dirnames, filenames in os.walk(dataset_dir)
         for filename in filenames
-        if filename.endswith('.avi')
+        if filename.endswith('.jpg')
     ]
 
-    # Randomly choose video paths
-    random_video_paths = random.sample(video_paths, num_videos)
-    return random_video_paths
+    return frame_files
+
+
+def load_video_clips(video_frames, clip_size=16):
+    num_frames = len(video_frames)
+    num_clips = num_frames // clip_size
+
+    video_frames_3d = []
+
+    for i in range(num_clips):
+        clip_indices = range(i * clip_size, (i + 1) * clip_size)
+        clip_frames = [cv2.imread(video_frames[idx]) for idx in clip_indices]
+        video_frames_3d.append(clip_frames)
+
+    return np.array(video_frames_3d)
 
 
 # Define the power normalization function P(z) = sign(z) * |z|^alpha
 def power_normalization(z, alpha=0.5):
     return torch.sign(z) * torch.abs(z) ** alpha
-
-
-def center_crop(frame):
-    # In the C3D architecture, the input frames are 112x112
-    frame = frame[8:120, 30:142, :]
-    return np.array(frame).astype(np.uint8)
 
 
 # Extract intermediate features from the C3D model for the input clip
@@ -72,7 +66,7 @@ def temporal_transformation(perturbation, tau_shift):
     Parameters
     ----------
     perturbation : numpy.ndarray
-        Original U3D perturbation of shape (H, W, T), where H is the height, W is the width, and T is the number of frames.
+        Original U3D perturbation of shape (T, H, W), where T is the number of frames, H is the height, and W is the width.
     tau_shift : int
         The temporal shift value for the transformation.
 
@@ -85,16 +79,50 @@ def temporal_transformation(perturbation, tau_shift):
     -----
     This function performs a temporal shift on the input perturbation by rolling frames along the temporal axis.
     """
-    H, W, T = perturbation.shape
     tau_shift = int(tau_shift)  # Ensure tau_shift is an integer
-    transformed_perturbation = np.zeros((H, W, T))
-    for t in range(T):
-        transformed_perturbation[:, :, t] = np.roll(
-            perturbation[:, :, t], tau_shift, axis=0)
+
+    # Shift the entire frames along the T axis
+    transformed_perturbation = np.roll(perturbation, tau_shift, axis=0)
+
     return transformed_perturbation
 
 
-def attack_objective(args, model, videos, params):
+def calculate_video_distance_expectation(model, video_clip, noise_cycle, I, T, alpha):
+    total_distance_expectation = 0.0
+
+    # Sample I random temporal transformations
+    for _ in range(I):
+        # Generate a random time index (tau) using a uniform distribution
+        tau = np.random.uniform(0, T)
+        t_sum = 0.0  # Initialize the sum of distances for this iteration
+
+        # Transform the noise values using the temporal transformation
+        transformed_perturbation = temporal_transformation(
+            noise_cycle, tau)
+
+        # Add the noise cycle to the video clip
+        clip_perturbed = video_clip + transformed_perturbation
+
+        # Calculate intermediate features for original and perturbed frames
+        features_original = intermediate_features(model, video_clip)
+        features_perturbed = intermediate_features(model, clip_perturbed)
+
+        # Calculate the power normalized distances at each layer
+        for layer_name in features_original.keys():
+            distance = torch.norm(
+                power_normalization(features_original[layer_name], alpha) -
+                power_normalization(features_perturbed[layer_name], alpha),
+                p=2
+            )
+            t_sum += distance.detach().cpu().item()
+
+        # Calculate the expectation of the total distance as the sum of distances across iterations divided by the number of iterations (I),
+        total_distance_expectation += t_sum / I
+
+    return total_distance_expectation
+
+
+def attack_objective(args, model, video_clips, params):
     """
     Calculate the attack objective using Particle Swarm Optimization (PSO).
 
@@ -124,8 +152,6 @@ def attack_objective(args, model, videos, params):
     - ε is the maximum allowed perturbation.
     """
 
-    features_original = {}
-    features_perturbed = {}
     noise_values_3D = []
 
     # Parameters for noise generation
@@ -139,77 +165,32 @@ def attack_objective(args, model, videos, params):
     noise_values_3D = generate_noise(T=T, frame_height=112, frame_width=112, num_octaves=num_octaves, wavelength_x=wavelength_x,
                                      wavelength_y=wavelength_y, wavelength_t=wavelength_t, color_period=color_period, epsilon=epsilon)
 
-    for video in videos:
-        total_distance_expectation = 0.0
-        cap_original = cv2.VideoCapture(video)
+    # TODO: Handle the case when the video clip length is less than T, e.g., where should the next video clip start?
+    # Extend the channels first
+    noise_reshaped = noise_values_3D[:, :, :,
+                                     np.newaxis]  # add an extra dimension
+    noise_cycle = noise_reshaped * np.ones((1, 1, 1, 3))
 
-        clip_original = []
-        clip_perturbed = []
-        distances = []
-        frame_num = 0
+    # Then cyclically extend along the T axis
+    num_frames = len(video_clips[0])
+    replication_factor = num_frames // T
+    noise_cycle = np.tile(noise_cycle, (replication_factor, 1, 1, 1))
 
-        # Sample I random temporal transformations
-        for _ in range(I):
-            # Generate a random time index (tau) using a uniform distribution
-            tau = np.random.uniform(0, T)
-            t_sum = 0.0  # Initialize the sum of distances for this iteration
+    # If there are remaining frames after tiling, append them
+    rm_frames = num_frames - T*replication_factor
+    if rm_frames > 0:
+        noise_cycle = np.concatenate(
+            [noise_cycle, noise_cycle[:rm_frames]], axis=0)
 
-            # Transform the noise values using the temporal transformation
-            transformed_perturbation = temporal_transformation(
-                noise_values_3D, tau)
+    total_distance_expectation = 0.0
+    for video_clip in video_clips:
+        total_distance_expectation += calculate_video_distance_expectation(
+            model, video_clip, noise_cycle, I, T, alpha)
 
-            # Loop through the frames in the video
-            while True:
-                ret_original, frame_original = cap_original.read()
+    # Extract number of videos from directory name
+    num_videos = int(os.path.basename(args.dataset_dir).split('_')[-1])
 
-                if not ret_original:
-                    break
-
-                # Preprocess the frames by resizing and center cropping
-                tmp_original = center_crop(
-                    cv2.resize(frame_original, (171, 128)))
-
-                # Add Perlin noise to the current frame using the precomputed noise values
-                t = frame_num % T  # Loop through the noise values
-                tmp_perturbed = add_perlin_noise_to_frame(
-                    tmp_original, transformed_perturbation[t])
-
-                # Apply color normalization
-                tmp_original = tmp_original - np.array([[[90.0, 98.0, 102.0]]])
-                tmp_perturbed = tmp_perturbed - \
-                    np.array([[[90.0, 98.0, 102.0]]])
-
-                clip_original.append(tmp_original)
-                clip_perturbed.append(tmp_perturbed)
-
-                if len(clip_original) == 16:
-                    features_original = intermediate_features(
-                        model, clip_original)
-                    features_perturbed = intermediate_features(
-                        model, clip_perturbed)
-
-                    # Calculate the power normalized distances at each layer
-                    for layer_name in features_original.keys():
-                        distance = torch.norm(power_normalization(
-                            features_original[layer_name], alpha) - power_normalization(features_perturbed[layer_name], alpha), p=2)
-                        distances.append(distance)
-
-                    # Remove the oldest frame from each clip
-                    clip_original.pop(0)
-                    clip_perturbed.pop(0)
-
-                    t_sum += sum(distances).detach().cpu().item()
-
-                frame_num += 1
-                distances = []  # Reset the distances for memory efficiency
-
-            # Calculate the expectation of the total distance as the sum of distances across iterations divided by the number of iterations (I),
-            total_distance_expectation += t_sum / I
-
-        # Release video file handles
-        cap_original.release()
-
-    total_distance_expectation = total_distance_expectation / len(videos)
+    total_distance_expectation = total_distance_expectation / num_videos
 
     print("Params:", params)
     print("Total distance:", total_distance_expectation)
@@ -235,7 +216,9 @@ def main(args):
     model.to(device)
     model.eval()
 
-    videos = randomly_choose_video_paths(args.dataset_path)
+    frame_files = load_preprocessed_frames(args.dataset_dir)
+    clip_size = 16
+    video_clips = load_video_clips(frame_files, clip_size)
 
     def objective_function(params):
         """
@@ -253,7 +236,7 @@ def main(args):
             Negative total distance (PSO minimizes, so we negate for maximization).
         """
         params = [round(p) if i == 0 else p for i, p in enumerate(params)]
-        total_distance = attack_objective(args, model, videos, params)
+        total_distance = attack_objective(args, model, video_clips, params)
         # Negate because PSO minimizes, and we want to maximize the distance
         return -total_distance
 
@@ -268,13 +251,31 @@ def main(args):
         maxiter=args.maxiter,
         debug=True)
 
+    # Save the best results in a text file
+    with open('attack_params.txt', 'a') as f:  # Open the file in append mode
+        f.write("PSO Settings:\n")
+        f.write("swarmsize: {}\n".format(args.swarmsize))
+        f.write("omega: {}\n".format(args.omega))
+        f.write("phip: {}\n".format(args.phip))
+        f.write("phig: {}\n".format(args.phig))
+        f.write("maxiter: {}\n".format(args.maxiter))
+        f.write("Best Parameters:\n")
+        f.write("num_octaves: {}\n".format(best_params[0]))
+        f.write("wavelength_x: {}\n".format(best_params[1]))
+        f.write("wavelength_y: {}\n".format(best_params[2]))
+        f.write("wavelength_t: {}\n".format(best_params[3]))
+        f.write("color_period: {}\n".format(best_params[4]))
+        f.write("\n\n")  # Add an empty line for separation
+
+    print("Best Parameters and PSO settings saved in 'attack_params.txt'")
+
 
 if __name__ == '__main__':
     # Default parameters are chosen based on the paper's settings (adjust as needed).
     parser = argparse.ArgumentParser(
         description='Universal 3-Dimensional Perturbations for Black-Box Attacks')
-    parser.add_argument('--dataset_path', type=str, required=True,
-                        help='Path to the video dataset')
+    parser.add_argument('--dataset_dir', '-d', type=str,
+                        required=True, help='Path to the video dataset')
     parser.add_argument('--m', type=str, required=True,
                         help='Path to the pretrained model')
     parser.add_argument('--dataset', type=str, choices=[

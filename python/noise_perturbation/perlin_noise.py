@@ -74,13 +74,13 @@ def perturb_video(num_octaves, wavelength_x, wavelength_y, wavelength_t, color_p
 if __name__ == '__main__':
     # Parameters for noise generation
     num_octaves = 5
-    wavelength_x = 2.0
-    wavelength_y = 180.0
-    wavelength_t = 49.35137797
+    wavelength_x = 2.1327105628890695
+    wavelength_y = 2.0
+    wavelength_t = 180.0
     color_period = 1.0
     T = 5  # Number of frames for Perlin noise generation (adjust as needed)
     epsilon = 8.0  # Maximum perturbation allowed (epsilon) for the U3D attack
-    input_video_path = '/mnt/data/UCF-101/Biking/v_Biking_g03_c04.avi'
+    input_video_path = '/mnt/data/ucf101/Biking/v_Biking_g03_c04.avi'
     output_video_path = 'python/noise_perturbation/perturbed_video.avi'
 
     perturb_video(num_octaves, wavelength_x, wavelength_y,
