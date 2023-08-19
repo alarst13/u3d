@@ -6,7 +6,6 @@ import os
 from multiprocessing import Pool, cpu_count
 from typing import Generator
 from functools import partial
-from concurrent.futures import ThreadPoolExecutor
 import argparse
 import logging
 
