@@ -39,10 +39,23 @@ cd u3d
 1. Run `build.sh` to automatically build Rust bindings for both `pso` and `perlin` crates:
 
 ```bash
-./build.sh
+bash build.sh
 ```
 
-### Step 5: Run the Attack
+### Step 5: Install Python Libraries
+
+1. **Install PyTorch:** Follow the instructions on the [PyTorch official website](https://pytorch.org/get-started/locally/) to install PyTorch for your specific system and needs.
+
+2. **Install Additional Libraries:** Use the following command to install `numpy`, `opencv`, and `tqdm`:
+
+```bash
+conda install numpy -c conda-forge opencv tqdm
+```
+
+### Step ?: Download `HMDB51` and `UCF101` datasets
+
+
+### Step ?: Run the Attack
 
 1. For the final step, move to the `python/` subdirectory:
 
