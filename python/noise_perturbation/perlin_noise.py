@@ -8,6 +8,7 @@ from typing import Generator
 from functools import partial
 import argparse
 import logging
+logging.basicConfig(level=logging.INFO)
 
 
 def save_video(args):
@@ -42,15 +43,29 @@ def load_video_frames(video_folder):
 
 def video_folder_paths(base_path: str) -> Generator[str, None, None]:
     """Generate paths to all video folders within the base path."""
-    # Get folders representing each action category
-    action_categories = [os.path.join(base_path, action) for action in os.listdir(
-        base_path) if os.path.isdir(os.path.join(base_path, action))]
 
-    # Yield individual video folder paths
-    for action_category in action_categories:
-        for video_folder in os.listdir(action_category):
-            if os.path.isdir(os.path.join(action_category, video_folder)):
-                yield os.path.join(action_category, video_folder)
+    # Get folders representing each dataset split (train, val, test)
+    splits = [os.path.join(base_path, split_name) for split_name in os.listdir(
+        base_path) if os.path.isdir(os.path.join(base_path, split_name))]
+
+    for split in splits:
+        # Get folders representing each action category
+        action_categories = [os.path.join(split, action) for action in os.listdir(
+            split) if os.path.isdir(os.path.join(split, action))]
+
+        # Yield individual video folder paths
+        for action_category in action_categories:
+            for video_folder in os.listdir(action_category):
+                video_path = os.path.join(action_category, video_folder)
+                if os.path.isdir(video_path) and any(f.endswith('.jpg') for f in os.listdir(video_path)):
+                    yield video_path
+
+
+def compute_mse(frame1, frame2):
+    """Compute the Mean Squared Error between two frames."""
+    error = np.sum((frame1.astype("float") - frame2.astype("float")) ** 2)
+    error /= float(frame1.shape[0] * frame1.shape[1])
+    return error
 
 
 def process_video_folder(video_folder: str, num_octaves: int, wavelength_x: float, wavelength_y: float,
@@ -107,18 +122,6 @@ def perturb_single_video(args):
     return perturbed_video
 
 
-def perturb_videos(videos, num_octaves, wavelength_x, wavelength_y, wavelength_t, color_period, T, epsilon):
-    """Perturb all given videos with Perlin noise."""
-    args_list = [(video, T, num_octaves, wavelength_x, wavelength_y,
-                  wavelength_t, color_period, epsilon) for video in videos]
-
-    # Use multiprocessing to process the videos in parallel
-    with Pool(cpu_count()) as pool:
-        perturbed_videos = list(pool.imap(perturb_single_video, args_list))
-
-    return perturbed_videos
-
-
 def main(args):
     """Main function to process video folders."""
     # Check if base path exists
@@ -157,14 +160,14 @@ if __name__ == '__main__':
     parser.add_argument('-n', '--num_octaves', type=int,
                         default=5, help='Number of octaves for noise generation')
     parser.add_argument('-x', '--wavelength_x', type=float,
-                        default=2.1327105628890695, help='Wavelength in x direction')
+                        default=2.0, help='Wavelength in x direction')
     parser.add_argument('-y', '--wavelength_y', type=float,
                         default=2.0, help='Wavelength in y direction')
     parser.add_argument('-t', '--wavelength_t', type=float,
                         default=180.0, help='Wavelength in time')
     parser.add_argument('-c', '--color_period', type=float,
                         default=1.0, help='Color period for noise')
-    parser.add_argument('-T', '--T', type=int, default=5,
+    parser.add_argument('-T', '--T', type=int, default=16,
                         help='Number of frames for Perlin noise generation')
     parser.add_argument('-e', '--epsilon', type=float,
                         default=8.0, help='Epsilon value for noise')

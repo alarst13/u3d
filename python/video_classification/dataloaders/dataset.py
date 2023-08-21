@@ -20,7 +20,7 @@ class VideoDataset(Dataset):
             preprocess (bool): Determines whether to preprocess dataset. Default is False.
     """
 
-    def __init__(self, root_dir, output_dir, dataset='ucf101', split='train', clip_len=16, preprocess=False):
+    def __init__(self, output_dir, root_dir=None, dataset='ucf101', split='train', clip_len=16, preprocess=False, verbose=True):
         self.root_dir, self.output_dir = root_dir, output_dir
         folder = os.path.join(self.output_dir, split)
         self.clip_len = clip_len
@@ -31,11 +31,10 @@ class VideoDataset(Dataset):
         self.resize_width = 171
         self.crop_size = 112
 
-        if not self.check_integrity():
-            raise RuntimeError('Dataset not found or corrupted.' +
-                               ' You need to download it from the official website.')
-
         if (not self.check_preprocess()) or preprocess:
+            if not self.check_integrity():
+                raise RuntimeError('Dataset not found or corrupted.' +
+                                   ' You need to download it from the official website.')
             print('Preprocessing of {} dataset, this will take long, but it will be done only once.'.format(
                 dataset))
             self.preprocess()
@@ -53,7 +52,9 @@ class VideoDataset(Dataset):
                 labels.append(label)
 
         assert len(labels) == len(self.fnames)
-        print('Number of {} videos: {:d}'.format(split, len(self.fnames)))
+        if verbose:
+            print('Number of {} videos: {:d}'.format(split, len(self.fnames)))
+
 
         # Prepare a mapping between the label names (strings) and indices (ints)
         self.label2index = {label: index for index,
@@ -79,12 +80,15 @@ class VideoDataset(Dataset):
         return torch.from_numpy(buffer), torch.from_numpy(labels)
 
     def check_integrity(self):
-        if not os.path.exists(self.root_dir):
-            return False
-        else:
-            return True
+        if not self.root_dir:
+            raise ValueError("Root directory is not provided.")
+        return os.path.exists(self.root_dir)
 
     def check_preprocess(self):
+        # Ensure output_dir is available
+        if not self.output_dir:
+            raise ValueError("Output directory is not provided.")
+
         # TODO: Check image size in output_dir
         if not os.path.exists(self.output_dir):
             return False
@@ -107,6 +111,12 @@ class VideoDataset(Dataset):
         return True
 
     def preprocess(self):
+        if not self.root_dir:
+            raise ValueError(
+                "Cannot preprocess data without a root directory.")
+        if not self.output_dir:
+            raise ValueError("Output directory is not provided.")
+
         if not os.path.exists(self.output_dir):
             os.mkdir(self.output_dir)
             os.mkdir(os.path.join(self.output_dir, 'train'))
@@ -236,6 +246,51 @@ class VideoDataset(Dataset):
                         width_index:width_index + crop_size, :]
 
         return buffer
+
+
+class CombinedDataset(VideoDataset):
+    """
+    This class represents a combined dataset that merges training, validation, 
+    and testing splits from a specified video dataset.
+
+    The class is a subclass of the VideoDataset, which means it inherits 
+    functionalities of the VideoDataset but also has the capability to handle 
+    multiple dataset splits (train, validation, and test).
+
+    Attributes:
+    - datasets: List of VideoDataset objects for each split (train, val, test).
+    - fnames: List of filenames accumulated from all dataset splits.
+    - label_array: Concatenated array of labels from all dataset splits.
+    - clip_len: Length of video clips to be processed.
+
+    Args:
+    - data_dir (str): Path to the directory where the dataset splits are stored.
+    - dataset (str): Name of the dataset (default is 'ucf101').
+    - clip_len (int): Length of video clips (default is 16).
+
+    Example:
+    combined_data = CombinedDataset(output_dir="/path/to/output", dataset="ucf101", clip_len=16)
+    """
+
+    def __init__(self, data_dir, dataset='ucf101', clip_len=16):
+        super(CombinedDataset, self).__init__(output_dir=data_dir,
+                                              dataset=dataset, split='', clip_len=clip_len)
+
+        splits = ['train', 'val', 'test']
+
+        # You can potentially extend this to avoid initializing the VideoDataset thrice.
+        self.datasets = {split: VideoDataset(
+            output_dir=data_dir, dataset=dataset, split=split, clip_len=clip_len, verbose=False) for split in splits}
+
+        self.fnames = []
+        self.label_array = np.array([], dtype=int)
+
+        for dataset in self.datasets.values():
+            self.fnames.extend(dataset.fnames)
+            self.label_array = np.concatenate(
+                (self.label_array, dataset.label_array))
+
+        self.clip_len = clip_len
 
 
 def main(args):

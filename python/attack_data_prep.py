@@ -3,7 +3,7 @@ import cv2
 import random
 import numpy as np
 import argparse
-from tqdm import tqdm  # Import tqdm for progress visualization
+from tqdm import tqdm
 
 
 def center_crop(frame):
@@ -44,17 +44,27 @@ def preprocess_and_save_frames(video_path, output_folder):
 
 def randomly_choose_and_preprocess_videos(dataset_root, output_folder, num_videos=500):
     video_paths = [
-        os.path.join(dirpath, filename)
+        (os.path.basename(dirpath), os.path.join(dirpath, filename))
         for dirpath, _, filenames in os.walk(dataset_root)
         for filename in filenames
         if filename.endswith('.avi')
     ]
 
-    random_video_paths = random.sample(video_paths, num_videos)
+    # Organize video paths by class
+    class_to_videos = {}
+    for c, video_path in video_paths:
+        class_to_videos.setdefault(c, []).append(video_path)
 
-    # Use tqdm to visualize the progress
+    # Calculate the number of videos to select from each class
+    total_videos = sum(len(videos) for videos in class_to_videos.values())
+    class_to_num_videos = {c: int(len(videos)/total_videos * num_videos)
+                           for c, videos in class_to_videos.items()}
+
+    random_video_paths = []
+    for c, num in class_to_num_videos.items():
+        random_video_paths.extend(random.sample(class_to_videos[c], num))
+
     for video_path in tqdm(random_video_paths, desc="Processing videos", unit="video"):
-        video_name = os.path.splitext(os.path.basename(video_path))[0]
         output_folder_with_num = f"{output_folder}_{num_videos}"
         preprocess_and_save_frames(video_path, output_folder_with_num)
 

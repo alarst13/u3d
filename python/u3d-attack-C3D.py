@@ -9,7 +9,7 @@ from psolib import particle_swarm_optimization as pso
 # from pyswarm import pso
 import argparse
 torch.backends.cudnn.benchmark = True
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
 
 
 def load_preprocessed_frames(dataset_dir):
@@ -159,7 +159,7 @@ def attack_objective(args, model, video_clips, params):
     T = args.T  # Number of frames for Perlin noise generation
     epsilon = args.epsilon  # Maximum perturbation allowed for the U3D attack
     alpha = args.alpha  # The alpha parameter for power normalization
-    I = args.I  # Number of iterations for sampling.
+    I = args.iteration  # Number of iterations for sampling.
 
     # Generate the Perlin noise for the first T frames
     noise_values_3D = generate_noise(T=T, frame_height=112, frame_width=112, num_octaves=num_octaves, wavelength_x=wavelength_x,
@@ -211,7 +211,8 @@ def main(args):
 
     # init model
     model = C3D_model.C3D(num_classes=num_classes)
-    checkpoint = torch.load(args.m, map_location=lambda storage, loc: storage)
+    checkpoint = torch.load(
+        args.model, map_location=lambda storage, loc: storage)
     model.load_state_dict(checkpoint['state_dict'])
     model.to(device)
     model.eval()
@@ -276,17 +277,17 @@ if __name__ == '__main__':
         description='Universal 3-Dimensional Perturbations for Black-Box Attacks')
     parser.add_argument('--dataset_dir', '-d', type=str,
                         required=True, help='Path to the video dataset')
-    parser.add_argument('--m', type=str, required=True,
+    parser.add_argument('--model', '-m', type=str, required=True,
                         help='Path to the pretrained model')
     parser.add_argument('--dataset', type=str, choices=[
                         'u', 'h'], default='h', help='Dataset name: "u" for UCF101 or "h" for HMDB51')
-    parser.add_argument('--lb', type=float, nargs=5, default=[1, 2.0, 2.0, 2.0, 1.0],
-                        help='Lower bounds for optimization parameters [num_octaves (int), wavelength_x (float), wavelength_y (float), wavelength_t (float), color_period (float)]')
+    parser.add_argument('--lb', type=float, nargs=5, default=[
+                        1, 2.0, 2.0, 2.0, 1.0], help='Lower bounds for optimization parameters [num_octaves (int), wavelength_x (float), wavelength_y (float), wavelength_t (float), color_period (float)]')
     parser.add_argument('--ub', type=float, nargs=5, default=[5, 180.0, 180.0, 180.0, 60.0],
                         help='Upper bounds for optimization parameters [num_octaves (int), wavelength_x (float), wavelength_y (float), wavelength_t (float), color_period (float)]')
     parser.add_argument('--swarmsize', type=int, default=20,
                         help='Size of the swarm in particle swarm optimization (PSO)')
-    parser.add_argument('--omega', type=float, default=1.2,
+    parser.add_argument('--omega', type=float, default=0.4,
                         help='Inertia weight for particle swarm optimization (PSO)')
     parser.add_argument('--phip', type=float, default=2.0,
                         help='Scaling factor for personal best in particle swarm optimization (PSO)')
@@ -294,14 +295,14 @@ if __name__ == '__main__':
                         help='Scaling factor for global best in particle swarm optimization (PSO)')
     parser.add_argument('--maxiter', type=int, default=40,
                         help='Maximum number of iterations in particle swarm optimization (PSO)')
-    parser.add_argument('--T', type=int, default=5,
+    parser.add_argument('--T', type=int, default=16,
                         help='Number of frames for Perlin noise generation')
     parser.add_argument('--epsilon', type=float, default=8.0,
                         help='Maximum perturbation allowed for the U3D attack')
     parser.add_argument('--alpha', type=float, default=0.5,
                         help='The alpha parameter for power normalization')
-    parser.add_argument('--I', type=int, default=5,
-                        help='Number of iterations for sampling')
+    parser.add_argument('--iteration', '-I', type=int,
+                        default=5, help='Number of iterations for sampling')
 
     args = parser.parse_args()
     main(args)
