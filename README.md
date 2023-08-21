@@ -49,10 +49,20 @@ bash build.sh
 2. **Install Additional Libraries:** Use the following command to install `numpy`, `opencv`, and `tqdm`:
 
 ```bash
-conda install numpy -c conda-forge opencv tqdm
+conda install numpy opencv tqdm
 ```
 
-### Step ?: Download `HMDB51` and `UCF101` datasets
+### Step 6: Download Datasets
+
+1. **HMDB51 Dataset:** 
+    - **Description:** The HMDB51 dataset is a large human motion database. 
+    - **Download:** Access the dataset and download options from the [HMDB51 official page](https://serre-lab.clps.brown.edu/resource/hmdb-a-large-human-motion-database/#Downloads).
+
+2. **UCF101 Dataset:** 
+    - **Description:** UCF101 is an action recognition dataset consisting of realistic action videos. 
+    - **Download:** You can download the dataset from the [UCF101 official website](https://www.crcv.ucf.edu/data/UCF101.php).
+
+Download the datasets to your preferred directory for further processing.
 
 
 ### Step ?: Run the Attack
