@@ -12,7 +12,7 @@ def center_crop(frame):
     return np.array(frame).astype(np.uint8)
 
 
-def preprocess_and_save_frames(video_path, output_folder):
+def preprocess_and_save_frames(video_path, output_folder, video_num, class_name):
     # Create the output folder if it doesn't exist
     os.makedirs(output_folder, exist_ok=True)
 
@@ -31,14 +31,15 @@ def preprocess_and_save_frames(video_path, output_folder):
         # Apply color normalization
         frame = frame - np.array([[[90.0, 98.0, 102.0]]])
 
-        # Generate a filename for the frame
-        frame_filename = f"{frame_num:04d}.jpg"
+        # Generate a filename for the frame with the video number and class name prefixes
+        frame_filename = f"{class_name}_{video_num:04d}_{frame_num:04d}.jpg"
         # Create the full path to save the frame image
         frame_path = os.path.join(output_folder, frame_filename)
 
         # Save the preprocessed frame image
         cv2.imwrite(frame_path, frame)
         frame_num += 1
+
     cap.release()
 
 
@@ -62,11 +63,11 @@ def randomly_choose_and_preprocess_videos(dataset_root, output_folder, num_video
 
     random_video_paths = []
     for c, num in class_to_num_videos.items():
-        random_video_paths.extend(random.sample(class_to_videos[c], num))
+        random_video_paths.extend((c, video)
+                                  for video in random.sample(class_to_videos[c], num))
 
-    for video_path in tqdm(random_video_paths, desc="Processing videos", unit="video"):
-        output_folder_with_num = f"{output_folder}_{num_videos}"
-        preprocess_and_save_frames(video_path, output_folder_with_num)
+    for idx, (class_name, video_path) in enumerate(tqdm(random_video_paths, desc="Processing videos", unit="video")):
+        preprocess_and_save_frames(video_path, output_folder, idx, class_name)
 
 
 def main(args):
