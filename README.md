@@ -97,12 +97,13 @@ Start the model training with:
 ```bash
 python train.py --dataset [DATASET_TYPE] --org_data [PATH/TO/ORIGINAL/DATASET] --data_path [PATH/TO/DATASET/SPLITS]
 ```
-In the command above:
-- Replace `[DATASET_TYPE]` with either:
-  - 'u' for UCF101
+Arguments to consider:
+- `--dataset`: Specifies the dataset name. Your options are:
+  - 'u' for UCF101 (default)
   - 'h' for HMDB51
-- Input the actual path to the original dataset in place of `[PATH/TO/ORIGINAL/DATASET]`.
-- Provide the actual path to where the dataset splits are saved in `[PATH/TO/DATASET/SPLITS]`.
+- `--org_data`: Input the actual path to the original dataset.
+- `--data_path`: Provide the actual path to where the dataset splits are saved.
+
 ### Step ?: Run the Attack
 
 1. For the final step, move to the `python/` subdirectory:
