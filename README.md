@@ -79,7 +79,7 @@ cd dataloaders
 ```
 Now, run the dataset preprocessing script:
 ```bash
-python dataset.py --dataset [DATASET_TYPE] --root_dir [PATH_TO_ROOT_DIRECTORY] --output_dir [PATH_TO_OUTPUT_DIRECTORY]
+python dataset.py --dataset DATASET_TYPE --root_dir PATH/TO/ROOT/DIRECTORY --output_dir PATH/TO/OUTPUT/DIRECTORY
 ```
 Arguments to consider:
 - `--dataset`: Specifies the dataset name. Your options are:
@@ -95,7 +95,7 @@ cd ..
 ```
 Start the model training with:
 ```bash
-python train.py --dataset [DATASET_TYPE] --org_data [PATH/TO/ORIGINAL/DATASET] --data_path [PATH/TO/DATASET/SPLITS]
+python train.py --dataset DATASET_TYPE --org_data PATH/TO/ROOT/DIRECTORY --data_path PATH/TO/OUTPUT/DIRECTORY
 ```
 Arguments to consider:
 - `--dataset`: Specifies the dataset name. Your options are:
