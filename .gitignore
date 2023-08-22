@@ -9,3 +9,4 @@ python/noise_perturbation/perturbed_video.avi
 rust/perlin/perlin-noise-3d-data.csv
 python/video_classification/run
 python/video_classification/dataloaders/__pycache__
+python/datasets

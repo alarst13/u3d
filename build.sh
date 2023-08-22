@@ -1,5 +1,7 @@
 #!/bin/bash
 
+cargo install maturin
+
 # Change directory to the "pso" crate
 cd rust/pso
 echo "Running maturin develop for 'pso' crate..."

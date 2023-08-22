@@ -49,7 +49,7 @@ bash build.sh
 2. **Install Additional Libraries:** Use the following command to install `numpy`, `opencv`, and `tqdm`:
 
 ```bash
-conda install numpy opencv tqdm
+conda install numpy opencv tqdm scikit-learn
 ```
 
 ### Step 6: Download Datasets
@@ -64,7 +64,45 @@ conda install numpy opencv tqdm
 
 Download the datasets to your preferred directory for further processing.
 
+### Step 6: Train the Models
 
+#### **Set up your working directory**
+First, navigate to the `video-classification` directory located under `python/video_classification`:
+```bash
+cd python/video_classification
+```
+
+#### **1. Preprocess the datasets**
+Move to the `dataloaders` directory inside `video_classification`:
+```bash
+cd dataloaders
+```
+Now, run the dataset preprocessing script:
+```bash
+python dataset.py --dataset [DATASET_TYPE] --root_dir [PATH_TO_ROOT_DIRECTORY] --output_dir [PATH_TO_OUTPUT_DIRECTORY]
+```
+Arguments to consider:
+- `--dataset`: Specifies the dataset name. Your options are:
+  - 'u' for UCF101 (default)
+  - 'h' for HMDB51
+- `--root_dir`: This is where you input the path to the directory of the downloaded dataset.
+- `--output_dir`: Input the path where you'd like the preprocessed dataset to be saved.
+
+#### **2. Train the models**
+Head back to the `video_classification` directory:
+```bash
+cd ..
+```
+Start the model training with:
+```bash
+python train.py --dataset [DATASET_TYPE] --org_data [PATH/TO/ORIGINAL/DATASET] --data_path [PATH/TO/DATASET/SPLITS]
+```
+In the command above:
+- Replace `[DATASET_TYPE]` with either:
+  - 'u' for UCF101
+  - 'h' for HMDB51
+- Input the actual path to the original dataset in place of `[PATH/TO/ORIGINAL/DATASET]`.
+- Provide the actual path to where the dataset splits are saved in `[PATH/TO/DATASET/SPLITS]`.
 ### Step ?: Run the Attack
 
 1. For the final step, move to the `python/` subdirectory:

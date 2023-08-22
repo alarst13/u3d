@@ -5,6 +5,7 @@ import torch
 import cv2
 import numpy as np
 from torch.utils.data import Dataset
+from concurrent.futures import ThreadPoolExecutor
 
 
 class VideoDataset(Dataset):
@@ -35,7 +36,7 @@ class VideoDataset(Dataset):
             if not self.check_integrity():
                 raise RuntimeError('Dataset not found or corrupted.' +
                                    ' You need to download it from the official website.')
-            print('Preprocessing of {} dataset, this will take long, but it will be done only once.'.format(
+            print('Preprocessing of {} dataset, this can take long, but it will be done only once.'.format(
                 dataset))
             self.preprocess()
 
@@ -112,71 +113,45 @@ class VideoDataset(Dataset):
 
     def preprocess(self):
         if not self.root_dir:
-            raise ValueError(
-                "Cannot preprocess data without a root directory.")
+            raise ValueError("Cannot preprocess data without a root directory.")
         if not self.output_dir:
             raise ValueError("Output directory is not provided.")
 
-        if not os.path.exists(self.output_dir):
-            os.mkdir(self.output_dir)
-            os.mkdir(os.path.join(self.output_dir, 'train'))
-            os.mkdir(os.path.join(self.output_dir, 'val'))
-            os.mkdir(os.path.join(self.output_dir, 'test'))
+        # Create output directories
+        os.makedirs(os.path.join(self.output_dir, 'train'), exist_ok=True)
+        os.makedirs(os.path.join(self.output_dir, 'val'), exist_ok=True)
+        os.makedirs(os.path.join(self.output_dir, 'test'), exist_ok=True)
 
-        # Split train/val/test sets
-        for file in os.listdir(self.root_dir):
-            file_path = os.path.join(self.root_dir, file)
-            video_files = [name for name in os.listdir(file_path)]
+        # Use thread pool for parallel processing
+        with ThreadPoolExecutor() as executor:
+            for file in os.listdir(self.root_dir):
+                file_path = os.path.join(self.root_dir, file)
+                video_files = [name for name in os.listdir(file_path)]
 
-            train_and_valid, test = train_test_split(
-                video_files, test_size=0.2, random_state=42)
-            train, val = train_test_split(
-                train_and_valid, test_size=0.2, random_state=42)
+                train_and_valid, test = train_test_split(
+                    video_files, test_size=0.2, random_state=42)
+                train, val = train_test_split(
+                    train_and_valid, test_size=0.2, random_state=42)
 
-            train_dir = os.path.join(self.output_dir, 'train', file)
-            val_dir = os.path.join(self.output_dir, 'val', file)
-            test_dir = os.path.join(self.output_dir, 'test', file)
-
-            if not os.path.exists(train_dir):
-                os.mkdir(train_dir)
-            if not os.path.exists(val_dir):
-                os.mkdir(val_dir)
-            if not os.path.exists(test_dir):
-                os.mkdir(test_dir)
-
-            for video in train:
-                self.process_video(video, file, train_dir)
-
-            for video in val:
-                self.process_video(video, file, val_dir)
-
-            for video in test:
-                self.process_video(video, file, test_dir)
+                # Use map to process videos in parallel
+                list(executor.map(self.process_video, [(video, file, os.path.join(self.output_dir, 'train', file)) for video in train]))
+                list(executor.map(self.process_video, [(video, file, os.path.join(self.output_dir, 'val', file)) for video in val]))
+                list(executor.map(self.process_video, [(video, file, os.path.join(self.output_dir, 'test', file)) for video in test]))
 
         print('Preprocessing finished.')
 
-    def process_video(self, video, action_name, save_dir):
-        # Initialize a VideoCapture object to read video data into a numpy array
+    def process_video(self, args):
+        video, action_name, save_dir = args
         video_filename = video.split('.')[0]
-        if not os.path.exists(os.path.join(save_dir, video_filename)):
-            os.mkdir(os.path.join(save_dir, video_filename))
-
-        capture = cv2.VideoCapture(os.path.join(
-            self.root_dir, action_name, video))
-
+        os.makedirs(os.path.join(save_dir, video_filename), exist_ok=True)
+        capture = cv2.VideoCapture(os.path.join(self.root_dir, action_name, video))
+        
         frame_count = int(capture.get(cv2.CAP_PROP_FRAME_COUNT))
         frame_width = int(capture.get(cv2.CAP_PROP_FRAME_WIDTH))
         frame_height = int(capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
-
-        # Make sure splited video has at least 16 frames
-        EXTRACT_FREQUENCY = 4
-        if frame_count // EXTRACT_FREQUENCY <= 16:
-            EXTRACT_FREQUENCY -= 1
-            if frame_count // EXTRACT_FREQUENCY <= 16:
-                EXTRACT_FREQUENCY -= 1
-                if frame_count // EXTRACT_FREQUENCY <= 16:
-                    EXTRACT_FREQUENCY -= 1
-
+        
+        EXTRACT_FREQUENCY = max(1, frame_count // 16)
+        
         count = 0
         i = 0
         retaining = True
@@ -188,16 +163,13 @@ class VideoDataset(Dataset):
 
             if count % EXTRACT_FREQUENCY == 0:
                 if (frame_height != self.resize_height) or (frame_width != self.resize_width):
-                    frame = cv2.resize(
-                        frame, (self.resize_width, self.resize_height))
-                cv2.imwrite(filename=os.path.join(
-                    save_dir, video_filename, '0000{}.jpg'.format(str(i))), img=frame)
+                    frame = cv2.resize(frame, (self.resize_width, self.resize_height))
+                cv2.imwrite(filename=os.path.join(save_dir, video_filename, '0000{}.jpg'.format(str(i))), img=frame)
                 i += 1
             count += 1
 
-        # Release the VideoCapture once it is no longer needed
         capture.release()
-
+    
     def randomflip(self, buffer):
         """Horizontally flip the given image and ground truth randomly with a probability of 0.5."""
 
