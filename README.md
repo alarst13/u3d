@@ -82,7 +82,7 @@ cd dataloaders
 ```
 Now, run the dataset preprocessing script:
 ```bash
-python dataset.py --dataset [DATASET_TYPE] --root_dir [PATH_TO_ROOT_DIRECTORY] --output_dir [PATH_TO_OUTPUT_DIRECTORY]
+python dataset.py --dataset [DATASET_TYPE] --root_dir PATH/TO/ROOT/DIRECTORY --output_dir PATH/TO/OUTPUT/DIRECTORY
 ```
 Arguments to consider:
 - `--dataset`: Specifies the dataset name. Your options are:
@@ -120,9 +120,9 @@ Start the model training with:
 ```bash
 python train.py --dataset [DATASET_TYPE] --data_org [PATH/TO/ORIGINAL/DATASET] --data_splits [PATH/TO/DATASET/SPLITS] --pretrained [PATH/TO/PRETRAINED/MODEL]
 ```
-In the command above:
-- Replace `[DATASET_TYPE]` with either:
-  - 'u' for UCF101
+Arguments to consider:
+- `--dataset`: Specifies the dataset name. Your options are:
+  - 'u' for UCF101 (default)
   - 'h' for HMDB51
 - Input the path to the original downloaded dataset in place of `[PATH/TO/ORIGINAL/DATASET]`.
 - Provide the path to where the dataset splits are saved in `[PATH/TO/DATASET/SPLITS]`.
