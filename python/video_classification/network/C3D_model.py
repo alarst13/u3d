@@ -8,7 +8,7 @@ class C3D(nn.Module):
     The C3D network.
     """
 
-    def __init__(self, num_classes, pretrained=False):
+    def __init__(self, num_classes, pretrained=False, pretrained_model=None):
         super(C3D, self).__init__()
 
         self.conv1 = nn.Conv3d(3, 64, kernel_size=(3, 3, 3), padding=(1, 1, 1))
@@ -48,7 +48,7 @@ class C3D(nn.Module):
         self.__init_weight()
 
         if pretrained:
-            self.__load_pretrained_weights()
+            self.__load_pretrained_weights(path=pretrained_model)
 
     def forward(self, x):
         intermediate_features = {}
@@ -89,7 +89,7 @@ class C3D(nn.Module):
 
         return logits, intermediate_features
 
-    def __load_pretrained_weights(self):
+    def __load_pretrained_weights(self, path):
         """Initialiaze network."""
         corresp_name = {
             # Conv1
@@ -126,7 +126,7 @@ class C3D(nn.Module):
 
         current_directory = os.path.basename(os.path.normpath(os.getcwd()))
         print("Current directory: ", current_directory)
-        pretrained_weights_path = "pretrained/c3d-pretrained.pth" if current_directory == "video_classification" else "video_classification/pretrained/c3d-pretrained.pth"
+        pretrained_weights_path = path
         p_dict = torch.load(pretrained_weights_path)
         s_dict = self.state_dict()
         for name in p_dict:
@@ -138,8 +138,6 @@ class C3D(nn.Module):
     def __init_weight(self):
         for m in self.modules():
             if isinstance(m, nn.Conv3d):
-                # n = m.kernel_size[0] * m.kernel_size[1] * m.out_channels
-                # m.weight.data.normal_(0, math.sqrt(2. / n))
                 torch.nn.init.kaiming_normal_(m.weight)
             elif isinstance(m, nn.BatchNorm3d):
                 m.weight.data.fill_(1)

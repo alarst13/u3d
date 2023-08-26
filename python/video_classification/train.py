@@ -18,7 +18,7 @@ print("Device being used:", device)
 modelName = 'C3D'
 
 
-def train_model(org_data_path, dataset_path, dataset, save_dir, num_classes, lr, num_epochs, save_epoch, useTest, test_interval, saveName, resume_epoch):
+def train_model(org_data_path, data_path, dataset, save_dir, num_classes, lr, num_epochs, save_epoch, useTest, test_interval, saveName, resume_epoch):
     """
     Args:
         num_classes (int): Number of classes in the data
@@ -26,7 +26,8 @@ def train_model(org_data_path, dataset_path, dataset, save_dir, num_classes, lr,
     """
 
     # C3D model
-    model = C3D_model.C3D(num_classes=num_classes, pretrained=True)
+    model = C3D_model.C3D(num_classes=num_classes,
+                          pretrained=True, pretrained_model=args.pretrained)
     train_params = [{'params': C3D_model.get_1x_lr_params(model), 'lr': lr},
                     {'params': C3D_model.get_10x_lr_params(model), 'lr': lr * 10}]
 
@@ -52,11 +53,11 @@ def train_model(org_data_path, dataset_path, dataset, save_dir, num_classes, lr,
 
     print('Training model on {} dataset...'.format(dataset))
 
-    train_dataloader = DataLoader(VideoDataset(root_dir=org_data_path, output_dir=dataset_path,
+    train_dataloader = DataLoader(VideoDataset(root_dir=org_data_path, output_dir=data_path,
                                   dataset=dataset, split='train', clip_len=16), batch_size=20, shuffle=True, num_workers=4)
-    val_dataloader = DataLoader(VideoDataset(root_dir=org_data_path, output_dir=dataset_path,
+    val_dataloader = DataLoader(VideoDataset(root_dir=org_data_path, output_dir=data_path,
                                 dataset=dataset, split='val',  clip_len=16), batch_size=20, num_workers=4)
-    test_dataloader = DataLoader(VideoDataset(root_dir=org_data_path, output_dir=dataset_path,
+    test_dataloader = DataLoader(VideoDataset(root_dir=org_data_path, output_dir=data_path,
                                  dataset=dataset, split='test', clip_len=16), batch_size=20, num_workers=4)
 
     trainval_loaders = {'train': train_dataloader, 'val': val_dataloader}
@@ -183,12 +184,12 @@ def main(args):
     snapshot = args.snapshot
     lr = args.lr
     # The directory where the preprocessed dataset is saved
-    dataset_path = args.data_path
+    data_path = args.data_splits
     # The directory where the original dataset is saved
     # This is used to check the integrity of the preprocessed dataset
-    org_dataset_path = args.org_data
+    org_data_path = args.data_org
 
-    train_model(org_data_path=org_dataset_path, dataset_path=dataset_path, dataset=dataset_name, save_dir=save_dir, num_classes=num_classes, lr=lr,
+    train_model(org_data_path=org_data_path, data_path=data_path, dataset=dataset_name, save_dir=save_dir, num_classes=num_classes, lr=lr,
                 num_epochs=nEpochs, save_epoch=snapshot, useTest=useTest, test_interval=nTestInterval, saveName=saveName, resume_epoch=resume_epoch)
 
 
@@ -198,7 +199,7 @@ if __name__ == "__main__":
 
     # Add command-line arguments with default values
     parser.add_argument('--dataset', type=str, choices=[
-        'u', 'h'], default='u', help='Dataset name: "u" for UCF101 or "h" for HMDB51')
+                        'u', 'h'], required=True, help='Dataset name: "u" for UCF101 or "h" for HMDB51')
     parser.add_argument('--nEpochs', type=int, default=20,
                         help='Number of epochs for training')
     parser.add_argument('--resume_epoch', type=int, default=0,
@@ -211,10 +212,12 @@ if __name__ == "__main__":
                         help='Checkpoint saving interval')
     parser.add_argument('--lr', type=float, default=1e-3,
                         help='Learning rate for optimization')
-    parser.add_argument('--org_data', type=str, default=None,
+    parser.add_argument('--data_org', type=str, required=True,
                         help='Path to the directory where the original dataset is saved')
-    parser.add_argument('--data_path', type=str, default=None,
+    parser.add_argument('--data_splits', type=str, required=True,
                         help='Path to the directory where the preprocessed dataset was saved')
+    parser.add_argument('--pretrained', '-p', type=str, required=True,
+                        help='Path to pretrained model for finetuning')
 
     # Parse the command-line arguments
     args = parser.parse_args()

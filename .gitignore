@@ -10,3 +10,4 @@ rust/perlin/perlin-noise-3d-data.csv
 python/video_classification/run
 python/video_classification/dataloaders/__pycache__
 python/datasets
+python/pretrained

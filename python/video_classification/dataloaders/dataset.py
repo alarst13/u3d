@@ -56,7 +56,6 @@ class VideoDataset(Dataset):
         if verbose:
             print('Number of {} videos: {:d}'.format(split, len(self.fnames)))
 
-
         # Prepare a mapping between the label names (strings) and indices (ints)
         self.label2index = {label: index for index,
                             label in enumerate(sorted(set(labels)))}
@@ -113,7 +112,8 @@ class VideoDataset(Dataset):
 
     def preprocess(self):
         if not self.root_dir:
-            raise ValueError("Cannot preprocess data without a root directory.")
+            raise ValueError(
+                "Cannot preprocess data without a root directory.")
         if not self.output_dir:
             raise ValueError("Output directory is not provided.")
 
@@ -134,24 +134,38 @@ class VideoDataset(Dataset):
                     train_and_valid, test_size=0.2, random_state=42)
 
                 # Use map to process videos in parallel
-                list(executor.map(self.process_video, [(video, file, os.path.join(self.output_dir, 'train', file)) for video in train]))
-                list(executor.map(self.process_video, [(video, file, os.path.join(self.output_dir, 'val', file)) for video in val]))
-                list(executor.map(self.process_video, [(video, file, os.path.join(self.output_dir, 'test', file)) for video in test]))
+                list(executor.map(self.process_video, [(video, file, os.path.join(
+                    self.output_dir, 'train', file)) for video in train]))
+                list(executor.map(self.process_video, [
+                     (video, file, os.path.join(self.output_dir, 'val', file)) for video in val]))
+                list(executor.map(self.process_video, [
+                     (video, file, os.path.join(self.output_dir, 'test', file)) for video in test]))
 
         print('Preprocessing finished.')
 
     def process_video(self, args):
         video, action_name, save_dir = args
+        # Initialize a VideoCapture object to read video data into a numpy array
         video_filename = video.split('.')[0]
-        os.makedirs(os.path.join(save_dir, video_filename), exist_ok=True)
-        capture = cv2.VideoCapture(os.path.join(self.root_dir, action_name, video))
-        
+        if not os.path.exists(os.path.join(save_dir, video_filename)):
+            os.makedirs(os.path.join(save_dir, video_filename), exist_ok=True)
+
+        capture = cv2.VideoCapture(os.path.join(
+            self.root_dir, action_name, video))
+
         frame_count = int(capture.get(cv2.CAP_PROP_FRAME_COUNT))
         frame_width = int(capture.get(cv2.CAP_PROP_FRAME_WIDTH))
         frame_height = int(capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        
-        EXTRACT_FREQUENCY = max(1, frame_count // 16)
-        
+
+        # Make sure splited video has at least 16 frames
+        EXTRACT_FREQUENCY = 4
+        if frame_count // EXTRACT_FREQUENCY <= 16:
+            EXTRACT_FREQUENCY -= 1
+            if frame_count // EXTRACT_FREQUENCY <= 16:
+                EXTRACT_FREQUENCY -= 1
+                if frame_count // EXTRACT_FREQUENCY <= 16:
+                    EXTRACT_FREQUENCY -= 1
+
         count = 0
         i = 0
         retaining = True
@@ -163,13 +177,16 @@ class VideoDataset(Dataset):
 
             if count % EXTRACT_FREQUENCY == 0:
                 if (frame_height != self.resize_height) or (frame_width != self.resize_width):
-                    frame = cv2.resize(frame, (self.resize_width, self.resize_height))
-                cv2.imwrite(filename=os.path.join(save_dir, video_filename, '0000{}.jpg'.format(str(i))), img=frame)
+                    frame = cv2.resize(
+                        frame, (self.resize_width, self.resize_height))
+                cv2.imwrite(filename=os.path.join(
+                    save_dir, video_filename, '0000{}.jpg'.format(str(i))), img=frame)
                 i += 1
             count += 1
 
+        # Release the VideoCapture once it is no longer needed
         capture.release()
-    
+
     def randomflip(self, buffer):
         """Horizontally flip the given image and ground truth randomly with a probability of 0.5."""
 

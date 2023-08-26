@@ -46,10 +46,13 @@ bash build.sh
 
 1. **Install PyTorch:** Follow the instructions on the [PyTorch official website](https://pytorch.org/get-started/locally/) to install PyTorch for your specific system and needs.
 
-2. **Install Additional Libraries:** Use the following command to install `numpy`, `opencv`, and `tqdm`:
+2. **Install Additional Libraries:** Use the following command to install `numpy`, `opencv`, `tqdm`, and `scikit-learn`:
 
 ```bash
-conda install numpy opencv tqdm scikit-learn
+conda install numpy tqdm scikit-learn
+```
+```bash
+pip install opencv-python
 ```
 
 ### Step 6: Download Datasets
@@ -66,13 +69,13 @@ Download the datasets to your preferred directory for further processing.
 
 ### Step 6: Train the Models
 
-#### **Set up your working directory**
+#### **1. Set up your working directory**
 First, navigate to the `video-classification` directory located under `python/video_classification`:
 ```bash
 cd python/video_classification
 ```
 
-#### **1. Preprocess the datasets**
+#### **2. Preprocess the datasets**
 Move to the `dataloaders` directory inside `video_classification`:
 ```bash
 cd dataloaders
@@ -88,21 +91,42 @@ Arguments to consider:
 - `--root_dir`: This is where you input the path to the directory of the downloaded dataset.
 - `--output_dir`: Input the path where you'd like the preprocessed dataset to be saved.
 
-#### **2. Train the models**
+#### **3. Download Pretrained Model for Fine-Tuning**
+
+To enable fine-tuning in our project, we require a pretrained C3D model from the Sports-1M dataset. Follow these steps:
+
+1. **Install `gdown` Package**:
+   
+   Install the `gdown` package to simplify Google Drive file downloads:
+
+   ```bash
+   pip install gdown
+   ```
+
+2. **Download Model**:
+   
+   Use this command to download the model:
+
+   ```bash
+   gdown https://drive.google.com/u/0/uc?id=19NWziHWh1LgCcHU34geoKwYezAogv9fX&export=download
+   ```
+
+#### **4. Train the models**
 Head back to the `video_classification` directory:
 ```bash
 cd ..
 ```
 Start the model training with:
 ```bash
-python train.py --dataset [DATASET_TYPE] --org_data [PATH/TO/ORIGINAL/DATASET] --data_path [PATH/TO/DATASET/SPLITS]
+python train.py --dataset [DATASET_TYPE] --data_org [PATH/TO/ORIGINAL/DATASET] --data_splits [PATH/TO/DATASET/SPLITS] --pretrained [PATH/TO/PRETRAINED/MODEL]
 ```
 In the command above:
 - Replace `[DATASET_TYPE]` with either:
   - 'u' for UCF101
   - 'h' for HMDB51
-- Input the actual path to the original dataset in place of `[PATH/TO/ORIGINAL/DATASET]`.
-- Provide the actual path to where the dataset splits are saved in `[PATH/TO/DATASET/SPLITS]`.
+- Input the path to the original downloaded dataset in place of `[PATH/TO/ORIGINAL/DATASET]`.
+- Provide the path to where the dataset splits are saved in `[PATH/TO/DATASET/SPLITS]`.
+- Replace `[PATH/TO/PRETRAINED/MODEL]` with the path to the pretrained model used for fine-tuning.
 ### Step ?: Run the Attack
 
 1. For the final step, move to the `python/` subdirectory:
