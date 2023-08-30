@@ -12,13 +12,20 @@ def center_crop(frame):
     return np.array(frame).astype(np.uint8)
 
 
-def preprocess_and_save_frames(video_path, output_folder, video_num, class_name):
-    # Create the output folder if it doesn't exist
-    os.makedirs(output_folder, exist_ok=True)
-
+def preprocess_and_save_frames(video_path, class_name, output_folder):
     # Open the video file for reading
     cap = cv2.VideoCapture(video_path)
     frame_num = 0
+
+    # Create a directory for this class
+    class_output_folder = os.path.join(output_folder, class_name)
+    os.makedirs(class_output_folder, exist_ok=True)
+
+    # Create a directory for this video
+    video_name = os.path.splitext(os.path.basename(video_path))[0]
+    video_output_folder = os.path.join(class_output_folder, video_name)
+    os.makedirs(video_output_folder, exist_ok=True)
+
     while True:
         # Read the next frame from the video
         ret, frame = cap.read()
@@ -32,9 +39,9 @@ def preprocess_and_save_frames(video_path, output_folder, video_num, class_name)
         frame = frame - np.array([[[90.0, 98.0, 102.0]]])
 
         # Generate a filename for the frame with the video number and class name prefixes
-        frame_filename = f"{class_name}_{video_num:04d}_{frame_num:04d}.jpg"
+        frame_filename = f"{frame_num:04d}.jpg"
         # Create the full path to save the frame image
-        frame_path = os.path.join(output_folder, frame_filename)
+        frame_path = os.path.join(video_output_folder, frame_filename)
 
         # Save the preprocessed frame image
         cv2.imwrite(frame_path, frame)
@@ -66,8 +73,11 @@ def randomly_choose_and_preprocess_videos(dataset_root, output_folder, num_video
         random_video_paths.extend((c, video)
                                   for video in random.sample(class_to_videos[c], num))
 
-    for idx, (class_name, video_path) in enumerate(tqdm(random_video_paths, desc="Processing videos", unit="video")):
-        preprocess_and_save_frames(video_path, output_folder, idx, class_name)
+    # Create the output folder if it doesn't exist
+    os.makedirs(output_folder, exist_ok=True)
+
+    for class_name, video_path in tqdm(random_video_paths, desc="Processing videos", unit="video"):
+        preprocess_and_save_frames(video_path, class_name, output_folder)
 
 
 def main(args):

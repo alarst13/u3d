@@ -67,7 +67,7 @@ pip install opencv-python
 
 Download the datasets to your preferred directory for further processing.
 
-### Step 6: Train the Models
+### Step 7: Train the Models
 
 #### **1. Set up your working directory**
 First, navigate to the `video-classification` directory located under `python/video_classification`:
@@ -127,7 +127,7 @@ Arguments to consider:
 - Input the path to the original downloaded dataset in place of `[PATH/TO/ORIGINAL/DATASET]`.
 - Provide the path to where the dataset splits are saved in `[PATH/TO/DATASET/SPLITS]`.
 - Replace `[PATH/TO/PRETRAINED/MODEL]` with the path to the pretrained model used for fine-tuning.
-### Step ?: Run the Attack
+### Step 8: Run the Attack
 
 1. For the final step, move to the `python/` subdirectory:
 

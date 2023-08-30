@@ -1,40 +1,15 @@
 import torch
 import numpy as np
 from numpy import array
-import cv2
+from video_classification.dataloaders.u3d_dataset import VideoClipsDataset
+from torch.utils.data import DataLoader
 from noise_perturbation.perlin_noise import generate_noise
 from video_classification.network import C3D_model
-import os
-from psolib import particle_swarm_optimization as pso
-# from pyswarm import pso
+# from psolib import particle_swarm_optimization as pso
+from pyswarm import pso
 import argparse
 torch.backends.cudnn.benchmark = True
-device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
-
-
-def load_preprocessed_frames(dataset_dir):
-    frame_files = [
-        os.path.join(dirpath, filename)
-        for dirpath, dirnames, filenames in os.walk(dataset_dir)
-        for filename in filenames
-        if filename.endswith('.jpg')
-    ]
-
-    return frame_files
-
-
-def load_video_clips(video_frames, clip_size=16):
-    num_frames = len(video_frames)
-    num_clips = num_frames // clip_size
-
-    video_frames_3d = []
-
-    for i in range(num_clips):
-        clip_indices = range(i * clip_size, (i + 1) * clip_size)
-        clip_frames = [cv2.imread(video_frames[idx]) for idx in clip_indices]
-        video_frames_3d.append(clip_frames)
-
-    return np.array(video_frames_3d)
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
 # Define the power normalization function P(z) = sign(z) * |z|^alpha
@@ -43,16 +18,7 @@ def power_normalization(z, alpha=0.5):
 
 
 # Extract intermediate features from the C3D model for the input clip
-def intermediate_features(model, clip):
-    inputs = np.array(clip).astype(np.float32)
-    inputs = np.expand_dims(inputs, axis=0)
-    inputs = np.transpose(inputs, (0, 4, 1, 2, 3))
-    inputs = torch.from_numpy(inputs)
-    inputs = torch.autograd.Variable(
-        inputs, requires_grad=False).to(device)
-
-    inputs = inputs.to(device)
-
+def intermediate_features(model, inputs):
     with torch.no_grad():
         logits, intermediate_dict = model.forward(inputs)
 
@@ -101,7 +67,10 @@ def calculate_video_distance_expectation(model, video_clip, noise_cycle, I, T, a
             noise_cycle, tau)
 
         # Add the noise cycle to the video clip
+        video_clip = video_clip.to(device)
+        transformed_perturbation = torch.tensor(transformed_perturbation, device=device)
         clip_perturbed = video_clip + transformed_perturbation
+        clip_perturbed = clip_perturbed.float()
 
         # Calculate intermediate features for original and perturbed frames
         features_original = intermediate_features(model, video_clip)
@@ -122,7 +91,7 @@ def calculate_video_distance_expectation(model, video_clip, noise_cycle, I, T, a
     return total_distance_expectation
 
 
-def attack_objective(args, model, video_clips, params):
+def attack_objective(args, model, dataloader, params):
     """
     Calculate the attack objective using Particle Swarm Optimization (PSO).
 
@@ -160,37 +129,18 @@ def attack_objective(args, model, video_clips, params):
     epsilon = args.epsilon  # Maximum perturbation allowed for the U3D attack
     alpha = args.alpha  # The alpha parameter for power normalization
     I = args.iteration  # Number of iterations for sampling.
+    total_distance_expectation = 0.0
 
     # Generate the Perlin noise for the first T frames
-    noise_values_3D = generate_noise(T=T, frame_height=112, frame_width=112, num_octaves=num_octaves, wavelength_x=wavelength_x,
-                                     wavelength_y=wavelength_y, wavelength_t=wavelength_t, color_period=color_period, epsilon=epsilon)
+    noise_values = generate_noise(T=T, frame_height=112, frame_width=112, num_octaves=num_octaves, wavelength_x=wavelength_x,
+                                  wavelength_y=wavelength_y, wavelength_t=wavelength_t, color_period=color_period, epsilon=epsilon)
 
-    # TODO: Handle the case when the video clip length is less than T, e.g., where should the next video clip start?
-    # Extend the channels first
-    noise_reshaped = noise_values_3D[:, :, :,
-                                     np.newaxis]  # add an extra dimension
-    noise_cycle = noise_reshaped * np.ones((1, 1, 1, 3))
-
-    # Then cyclically extend along the T axis
-    num_frames = len(video_clips[0])
-    replication_factor = num_frames // T
-    noise_cycle = np.tile(noise_cycle, (replication_factor, 1, 1, 1))
-
-    # If there are remaining frames after tiling, append them
-    rm_frames = num_frames - T*replication_factor
-    if rm_frames > 0:
-        noise_cycle = np.concatenate(
-            [noise_cycle, noise_cycle[:rm_frames]], axis=0)
-
-    total_distance_expectation = 0.0
-    for video_clip in video_clips:
+    # TODO: Handle the case when T is not 16
+    for video_clip, _ in dataloader:
         total_distance_expectation += calculate_video_distance_expectation(
-            model, video_clip, noise_cycle, I, T, alpha)
+            model, video_clip, noise_values, I, T, alpha)
 
-    # Extract number of videos from directory name
-    num_videos = int(os.path.basename(args.dataset_dir).split('_')[-1])
-
-    total_distance_expectation = total_distance_expectation / num_videos
+    total_distance_expectation = total_distance_expectation / dataloader.__len__()
 
     print("Params:", params)
     print("Total distance:", total_distance_expectation)
@@ -217,9 +167,8 @@ def main(args):
     model.to(device)
     model.eval()
 
-    frame_files = load_preprocessed_frames(args.dataset_dir)
-    clip_size = 16
-    video_clips = load_video_clips(frame_files, clip_size)
+    dataset = VideoClipsDataset(videos_dir=args.dataset_dir, clip_len=16)
+    dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
 
     def objective_function(params):
         """
@@ -237,7 +186,7 @@ def main(args):
             Negative total distance (PSO minimizes, so we negate for maximization).
         """
         params = [round(p) if i == 0 else p for i, p in enumerate(params)]
-        total_distance = attack_objective(args, model, video_clips, params)
+        total_distance = attack_objective(args, model, dataloader, params)
         # Negate because PSO minimizes, and we want to maximize the distance
         return -total_distance
 
