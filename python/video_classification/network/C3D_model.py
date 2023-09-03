@@ -148,6 +148,7 @@ def get_1x_lr_params(model):
     """
     This generator returns all the parameters for conv and two fc layers of the net.
     """
+    # model = model.module  # Delete this if you don't want to use DataParallel
     b = [model.conv1, model.conv2, model.conv3a, model.conv3b, model.conv4a, model.conv4b,
          model.conv5a, model.conv5b, model.fc6, model.fc7]
     for i in range(len(b)):
@@ -160,6 +161,7 @@ def get_10x_lr_params(model):
     """
     This generator returns all the parameters for the last fc layer of the net.
     """
+    # model = model.module  # Use this if you want to use DataParallel
     b = [model.fc8]
     for j in range(len(b)):
         for k in b[j].parameters():

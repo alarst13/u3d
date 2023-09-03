@@ -39,3 +39,31 @@ wavelength_t: 180.0
 color_period: 1.0
 
 
+PSO Settings:
+swarmsize: 20
+omega: 0.4
+phip: 2.0
+phig: 2.0
+maxiter: 40
+Best Parameters:
+num_octaves: 5.0
+wavelength_x: 2.0
+wavelength_y: 119.77034923714966
+wavelength_t: 43.30831314520749
+color_period: 1.0
+
+
+PSO Settings:
+swarmsize: 20
+omega: 0.4
+phip: 2.0
+phig: 2.0
+maxiter: 40
+Best Parameters:
+num_octaves: 5.0
+wavelength_x: 2.0
+wavelength_y: 116.71083160778609
+wavelength_t: 31.614419208702866
+color_period: 1.0
+
+

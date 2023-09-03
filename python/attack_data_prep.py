@@ -94,12 +94,12 @@ def main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Preprocess and save video frames")
-    parser.add_argument("--dataset_root", "-d", type=str, required=True,
-                        help="Path to the dataset root directory")
-    parser.add_argument("--output_folder", "-o", type=str, required=True,
-                        help="Path to the output folder for saving preprocessed frames")
-    parser.add_argument("--num_videos", "-n", type=int, default=500,
-                        help="Number of videos to randomly choose and process")
+    parser.add_argument('--dataset_root', '-d', type=str, required=True,
+                        help='Directory path with video splits (train, val, test)')
+    parser.add_argument('--output_folder', '-o', type=str, required=True,
+                        help='Path to the output folder for saving preprocessed frames')
+    parser.add_argument('--num_videos', '-n', type=int, default=500,
+                        help='Number of videos to randomly choose and process')
 
     args = parser.parse_args()
 

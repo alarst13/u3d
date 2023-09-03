@@ -61,13 +61,6 @@ def video_folder_paths(base_path: str) -> Generator[str, None, None]:
                     yield video_path
 
 
-def compute_mse(frame1, frame2):
-    """Compute the Mean Squared Error between two frames."""
-    error = np.sum((frame1.astype("float") - frame2.astype("float")) ** 2)
-    error /= float(frame1.shape[0] * frame1.shape[1])
-    return error
-
-
 def process_video_folder(video_folder: str, num_octaves: int, wavelength_x: float, wavelength_y: float,
                          wavelength_t: float, color_period: float, T: int, epsilon: float,
                          base_path: str, output_base_path: str) -> None:
@@ -148,7 +141,7 @@ def main(args):
                               epsilon=args.epsilon,
                               base_path=args.base_path,
                               output_base_path=args.output_base_path),
-                      tqdm(video_folder_paths(args.base_path), total=total_folders, desc="Adding noise to video folders")))
+                      tqdm(video_folder_paths(args.base_path), total=total_folders, desc="Adding noise to videos")))
 
     print("\nAll videos have been perturbed successfully!")
 
@@ -162,9 +155,9 @@ if __name__ == '__main__':
     parser.add_argument('-x', '--wavelength_x', type=float,
                         default=2.0, help='Wavelength in x direction')
     parser.add_argument('-y', '--wavelength_y', type=float,
-                        default=2.0, help='Wavelength in y direction')
+                        default=119.77034923714966, help='Wavelength in y direction')
     parser.add_argument('-t', '--wavelength_t', type=float,
-                        default=180.0, help='Wavelength in time')
+                        default=43.30831314520749, help='Wavelength in time')
     parser.add_argument('-c', '--color_period', type=float,
                         default=1.0, help='Color period for noise')
     parser.add_argument('-T', '--T', type=int, default=16,
@@ -172,7 +165,7 @@ if __name__ == '__main__':
     parser.add_argument('-e', '--epsilon', type=float,
                         default=8.0, help='Epsilon value for noise')
     parser.add_argument('-b', '--base_path', type=str,
-                        required=True, help='Base path for video folders')
+                        required=True, help='Directory path with video splits (train, val, test)')
     parser.add_argument('-o', '--output_base_path', type=str,
                         required=True, help='Output path for perturbed videos')
 

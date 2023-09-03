@@ -12,7 +12,7 @@ from dataloaders.dataset import VideoDataset
 from network import C3D_model
 
 # Use GPU if available else revert to CPU
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Device being used:", device)
 
 modelName = 'C3D'
@@ -27,7 +27,8 @@ def train_model(org_data_path, data_path, dataset, save_dir, num_classes, lr, nu
 
     # C3D model
     model = C3D_model.C3D(num_classes=num_classes,
-                          pretrained=True, pretrained_model=args.pretrained)
+                          pretrained=True, pretrained_model=args.pretrained).to(device)
+    # model = torch.nn.DataParallel(model).to(device)
     train_params = [{'params': C3D_model.get_1x_lr_params(model), 'lr': lr},
                     {'params': C3D_model.get_10x_lr_params(model), 'lr': lr * 10}]
 
@@ -54,11 +55,11 @@ def train_model(org_data_path, data_path, dataset, save_dir, num_classes, lr, nu
     print('Training model on {} dataset...'.format(dataset))
 
     train_dataloader = DataLoader(VideoDataset(root_dir=org_data_path, output_dir=data_path,
-                                  dataset=dataset, split='train', clip_len=16), batch_size=20, shuffle=True, num_workers=4)
+                                  dataset=dataset, split='train', clip_len=16), batch_size=128, shuffle=True, num_workers=4)
     val_dataloader = DataLoader(VideoDataset(root_dir=org_data_path, output_dir=data_path,
-                                dataset=dataset, split='val',  clip_len=16), batch_size=20, num_workers=4)
+                                dataset=dataset, split='val',  clip_len=16), batch_size=128, num_workers=4)
     test_dataloader = DataLoader(VideoDataset(root_dir=org_data_path, output_dir=data_path,
-                                 dataset=dataset, split='test', clip_len=16), batch_size=20, num_workers=4)
+                                 dataset=dataset, split='test', clip_len=16), batch_size=128, num_workers=4)
 
     trainval_loaders = {'train': train_dataloader, 'val': val_dataloader}
     trainval_sizes = {x: len(trainval_loaders[x].dataset) for x in [

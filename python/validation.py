@@ -12,7 +12,7 @@ torch.backends.cudnn.benchmark = True
 torch.manual_seed(0)
 
 # Use GPU if available else revert to CPU
-device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
 print("Device being used:", device)
 
 
@@ -24,6 +24,7 @@ def test_model(model, criterion, test_dataloader):
 
     all_labels = []
     all_preds = []
+    all_probs = []
 
     start_time = timeit.default_timer()
     for inputs, labels in tqdm(test_dataloader):
@@ -33,6 +34,7 @@ def test_model(model, criterion, test_dataloader):
         with torch.no_grad():
             outputs, _ = model(inputs)
         probs = nn.Softmax(dim=1)(outputs)
+        mx_probs = torch.max(probs, 1)[0]
         preds = torch.max(probs, 1)[1]
         loss = criterion(outputs, labels)
 
@@ -41,6 +43,7 @@ def test_model(model, criterion, test_dataloader):
 
         all_labels.extend(labels.cpu().tolist())
         all_preds.extend(preds.cpu().tolist())
+        all_probs.extend(mx_probs.cpu().tolist())
 
     epoch_loss = running_loss / test_size
     epoch_acc = running_corrects.double() / test_size
@@ -49,30 +52,25 @@ def test_model(model, criterion, test_dataloader):
     stop_time = timeit.default_timer()
     print("Execution time: " + str(stop_time - start_time) + "\n")
 
-    return all_labels, all_preds
+    return all_labels, all_preds, all_probs
 
 
-def calculate_attack_success_rate(original_preds, perturbed_preds):
+def calculate_attack_success_rate(original_preds, perturbed_preds, original_probs, perturbed_probs):
     """
-    Calculate the success rate of adversarial attacks based on predictions.
-
-    Given the original predictions and the predictions after perturbation, this function
-    calculates the rate at which the perturbations were successful in causing the model
-    to make a different prediction.
-
-    The success rate is computed as:
-
-    Success Rate = (Number of instances where original_preds[i] ≠ perturbed_preds[i]) / Total number of instances
+    Calculate the success rate of adversarial attacks based on predictions and decrease in confidence.
 
     Args:
-    - original_preds (list or array): The list of predictions made by the model on the original, unperturbed data.
-    - perturbed_preds (list or array): The list of predictions made by the model on the perturbed (or attacked) data.
+    - original_preds (list): The list of predictions made by the model on the original, unperturbed data.
+    - perturbed_preds (list): The list of predictions made by the model on the perturbed (or attacked) data.
+    - original_probs (list): Confidence of original predictions.
+    - perturbed_probs (list): Confidence of perturbed predictions.
 
     Returns:
     - float: The success rate of the attacks.
     """
-    successful_attacks = sum(1 for o, p in zip(
-        original_preds, perturbed_preds) if o != p)
+
+    successful_attacks = sum(1 for o, p, orig_prob, pert_prob in zip(
+        original_preds, perturbed_preds, original_probs, perturbed_probs) if o != p or (o == p and pert_prob != orig_prob))
     return successful_attacks / len(original_preds)
 
 
@@ -98,17 +96,19 @@ def main(args):
     criterion = nn.CrossEntropyLoss().to(device)
 
     org_dataloader = DataLoader(CombinedDataset(
-        data_dir=args.data_org, dataset=dataset, clip_len=16), batch_size=20, num_workers=4)
+        data_dir=args.data_org, dataset=dataset, clip_len=16), batch_size=32, num_workers=4)
     prt_dataloader = DataLoader(CombinedDataset(
-        data_dir=args.data_org, dataset=dataset, clip_len=16), batch_size=20, num_workers=4)
+        data_dir=args.data_prt, dataset=dataset, clip_len=16), batch_size=32, num_workers=4)
 
     print("Testing on original data")
-    original_preds = test_model(model, criterion, org_dataloader)
+    original_labels, original_preds, original_probs = test_model(
+        model, criterion, org_dataloader)
     print("Testing on perturbed data")
-    perturbed_preds = test_model(model, criterion, prt_dataloader)
+    perturbed_labels, perturbed_preds, perturbed_probs = test_model(
+        model, criterion, prt_dataloader)
 
     success_rate = calculate_attack_success_rate(
-        original_preds, perturbed_preds)
+        original_preds, perturbed_preds, original_probs, perturbed_probs)
     print(f"Attack success rate: {success_rate * 100:.2f}%")
 
 

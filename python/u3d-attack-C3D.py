@@ -5,11 +5,11 @@ from video_classification.dataloaders.u3d_dataset import VideoClipsDataset
 from torch.utils.data import DataLoader
 from noise_perturbation.perlin_noise import generate_noise
 from video_classification.network import C3D_model
-# from psolib import particle_swarm_optimization as pso
-from pyswarm import pso
+from psolib import particle_swarm_optimization as pso
+# from pyswarm import pso
 import argparse
 torch.backends.cudnn.benchmark = True
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
 
 
 # Define the power normalization function P(z) = sign(z) * |z|^alpha
@@ -54,11 +54,12 @@ def temporal_transformation(perturbation, tau_shift):
 
 
 def calculate_video_distance_expectation(model, video_clip, noise_cycle, I, T, alpha):
+    video_clip = video_clip.to(device)
+
     total_distance_expectation = 0.0
 
     # Sample I random temporal transformations
     for _ in range(I):
-        # Generate a random time index (tau) using a uniform distribution
         tau = np.random.uniform(0, T)
         t_sum = 0.0  # Initialize the sum of distances for this iteration
 
@@ -67,9 +68,10 @@ def calculate_video_distance_expectation(model, video_clip, noise_cycle, I, T, a
             noise_cycle, tau)
 
         # Add the noise cycle to the video clip
-        video_clip = video_clip.to(device)
-        transformed_perturbation = torch.tensor(transformed_perturbation, device=device)
-        clip_perturbed = video_clip + transformed_perturbation
+        transformed_perturbation = torch.tensor(
+            transformed_perturbation, device=device)
+        clip_perturbed = torch.clamp(
+            video_clip + transformed_perturbation, 0, 255)
         clip_perturbed = clip_perturbed.float()
 
         # Calculate intermediate features for original and perturbed frames
@@ -93,35 +95,31 @@ def calculate_video_distance_expectation(model, video_clip, noise_cycle, I, T, a
 
 def attack_objective(args, model, dataloader, params):
     """
-    Calculate the attack objective using Particle Swarm Optimization (PSO).
+    Computes the attack objective using Particle Swarm Optimization (PSO).
+
+    The goal of this function is to optimize an objective that measures the distortion between
+    original video frames and those modified by a perturbation. The perturbation is applied based 
+    on certain parameters and a time step, and is subject to constraints on its magnitude.
 
     Parameters:
+        args: Miscellaneous arguments.
         model (torch.nn.Module): The pre-trained DNN model.
-        input_video_path (str): Path to the input video.
-        params (list): List of U3D parameters for the attack.
+        dataloader: DataLoader for accessing video frames.
+        params (list): Parameters guiding the U3D perturbation.
 
     Returns:
         float: The attack objective value.
 
-    The attack objective function maximizes the expectation over the input video frames and time steps,
-    subject to a perturbation constraint.
-
-    The optimization problem aims to maximize the sum of the distortion between the original frames and
-    the frames modified by the perturbation. The perturbation is applied based on the U3D parameters and
-    the time step. The perturbation is subject to a maximum perturbation constraint.
-
-    Mathematically:
+    Mathematical Formulation:
         max ξ: ∑_{video, time step} ∑_{dimension} Distortion(original_frame, perturbed_frame; dimension)
         s.t. ξ = Noise(T; strength), ||ξ||_{∞} ≤ ε
 
     Where:
-    - ξ represents the perturbation.
-    - Distortion measures the difference between frames along different dimensions.
-    - Noise(T; strength) generates noise based on the U3D parameters and time step.
-    - ε is the maximum allowed perturbation.
+    - ξ denotes the perturbation.
+    - Distortion represents the differential measure between frames across various dimensions.
+    - Noise(T; strength) generates noise influenced by the U3D parameters and time step.
+    - ε defines the maximum allowable perturbation magnitude.
     """
-
-    noise_values_3D = []
 
     # Parameters for noise generation
     num_octaves, wavelength_x, wavelength_y, wavelength_t, color_period = params
@@ -160,15 +158,15 @@ def main(args):
         raise ValueError("Unsupported dataset name")
 
     # init model
-    model = C3D_model.C3D(num_classes=num_classes)
+    model = C3D_model.C3D(num_classes=num_classes).to(device)
     checkpoint = torch.load(
         args.model, map_location=lambda storage, loc: storage)
+    # model = torch.nn.DataParallel(model).to(device)
     model.load_state_dict(checkpoint['state_dict'])
-    model.to(device)
     model.eval()
 
     dataset = VideoClipsDataset(videos_dir=args.dataset_dir, clip_len=16)
-    dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
+    dataloader = DataLoader(dataset, batch_size=64, shuffle=True)
 
     def objective_function(params):
         """
@@ -202,7 +200,7 @@ def main(args):
         debug=True)
 
     # Save the best results in a text file
-    with open('attack_params.txt', 'a') as f:  # Open the file in append mode
+    with open('attack_params.txt', 'a') as f:
         f.write("PSO Settings:\n")
         f.write("swarmsize: {}\n".format(args.swarmsize))
         f.write("omega: {}\n".format(args.omega))
@@ -225,7 +223,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description='Universal 3-Dimensional Perturbations for Black-Box Attacks')
     parser.add_argument('--dataset_dir', '-d', type=str,
-                        required=True, help='Path to the video dataset')
+                        required=True, help='Path to the random video dataset')
     parser.add_argument('--model', '-m', type=str, required=True,
                         help='Path to the pretrained model')
     parser.add_argument('--dataset', type=str, choices=[
@@ -236,7 +234,7 @@ if __name__ == '__main__':
                         help='Upper bounds for optimization parameters [num_octaves (int), wavelength_x (float), wavelength_y (float), wavelength_t (float), color_period (float)]')
     parser.add_argument('--swarmsize', type=int, default=20,
                         help='Size of the swarm in particle swarm optimization (PSO)')
-    parser.add_argument('--omega', type=float, default=0.4,
+    parser.add_argument('--omega', type=float, default=1.2,
                         help='Inertia weight for particle swarm optimization (PSO)')
     parser.add_argument('--phip', type=float, default=2.0,
                         help='Scaling factor for personal best in particle swarm optimization (PSO)')

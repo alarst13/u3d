@@ -183,10 +183,10 @@ pub fn perlin_with_octaves(
     // Apply sine color map
     noise = sine_map(noise, color_period);
 
-    // Scale to the range [0, 1]
-    noise = (noise + 1.0) / 2.0;
+    // // Scale to the range [0, 1]
+    // noise = (noise + 1.0) / 2.0;
 
-    // Scale to the range [0, 10]
+    // Scale to the range [0, epsilon]
     noise *= epsilon;
 
     noise
