@@ -205,3 +205,17 @@ python evaluate_attack.py --dataset u --data_org [PATH/TO/UCF101/SPLITS] --data_
 ```
 
 If you followed the instructions correctly, you should achieve an **84.59%** success rate on the UCF101 dataset.
+
+## Citation
+
+If you use this implementation or are inspired by the associated paper, please consider citing:
+
+```bibtex
+@inproceedings{xie2022universal,
+  title={Universal 3-dimensional perturbations for black-box attacks on video recognition systems},
+  author={Xie, Shangyu and Wang, Han and Kong, Yu and Hong, Yuan},
+  booktitle={2022 IEEE Symposium on Security and Privacy (SP)},
+  pages={1390--1407},
+  year={2022},
+  organization={IEEE}
+}
