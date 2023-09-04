@@ -1,4 +1,11 @@
+<p align="center">
+  <img src="https://github.com/alarst13/u3d/assets/49977238/ae355ebe-e4c0-44a2-b42b-587c504c6cf3" alt="Perturbed Image">
+  <br>
+  Example of a perturbed video with U3D. For greater imperceptibility, choose a smaller epsilon.
+</p>
+
 # U3D
+
 
 This repository contains an implementation based on the paper [Universal 3-Dimensional Perturbations for Black-Box Attacks on Video Recognition Systems](https://arxiv.org/pdf/2107.04284.pdf).
 
