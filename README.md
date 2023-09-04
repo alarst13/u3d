@@ -206,6 +206,18 @@ python evaluate_attack.py --dataset u --data_org [PATH/TO/UCF101/SPLITS] --data_
 
 If you followed the instructions correctly, you should achieve an **84.59%** success rate on the UCF101 dataset.
 
+## License
+
+U3D is dual-licensed under either of the following, at your discretion:
+
+- **Apache License, Version 2.0**
+  - [LICENSE-APACHE](LICENSE-APACHE) or [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
+
+- **MIT license**
+  - [LICENSE-MIT](LICENSE-MIT) or [http://opensource.org/licenses/MIT](http://opensource.org/licenses/MIT)
+
+Unless explicitly stated otherwise, any contribution intentionally submitted for inclusion in U3D by you shall be dual-licensed as above, without any additional terms or conditions.
+
 ## Citation
 
 If you use this implementation or are inspired by the associated paper, please consider citing:
