@@ -1,8 +1,39 @@
-<p align="center">
-  <img src="https://github.com/alarst13/u3d/assets/49977238/ae355ebe-e4c0-44a2-b42b-587c504c6cf3" alt="Perturbed Image">
-  <br>
-  Example of a perturbed video with U3D. For greater imperceptibility, choose a smaller epsilon.
-</p>
+<div align="center">
+  <table align="center">
+    <tr>
+      <td><img src="https://github.com/alarst13/u3d/assets/49977238/e34a0895-0f79-4024-a641-059ee4a74fac"></td>
+      <td><img src="https://github.com/alarst13/u3d/assets/49977238/2634d4ee-16d1-4836-b3e0-d071b5e7074e"></td>
+      <td><img src="https://github.com/alarst13/u3d/assets/49977238/b7157d09-4f60-4e35-b1f3-80973856c498"></td>
+      <td><img src="https://github.com/alarst13/u3d/assets/49977238/663ac3f4-ea55-4416-8a69-55a6b91ba15b"></td>
+      <td><img src="https://github.com/alarst13/u3d/assets/49977238/4fe5b5cf-0f6a-4cca-b670-6cd4eb856962"></td>
+      <td><img src="https://github.com/alarst13/u3d/assets/49977238/44596828-1749-4eea-a505-3f0c77db3329"></td>
+      <td><img src="https://github.com/alarst13/u3d/assets/49977238/714b4351-cdf6-4628-9a49-21290c94916d"></td>
+    <tr>
+    <tr>
+      <td><img src="https://github.com/alarst13/u3d/assets/49977238/8fe412e6-02dd-4c67-94dd-e23a90203acc"></td>
+      <td><img src="https://github.com/alarst13/u3d/assets/49977238/577afe3e-f89a-41dd-a1d9-088b561bdd6e"></td>
+      <td><img src="https://github.com/alarst13/u3d/assets/49977238/6eb7609b-c2dc-4e0f-bfd6-b5f2f4c33e6e"></td>
+      <td><img src="https://github.com/alarst13/u3d/assets/49977238/32f3d281-113b-47c6-80c9-cf772c42f4b7"></td>
+      <td><img src="https://github.com/alarst13/u3d/assets/49977238/d0f0801a-e77f-4661-824a-4d6d0f8e5429"></td>
+      <td><img src="https://github.com/alarst13/u3d/assets/49977238/4b7cd996-e0b9-48be-9e64-6f4086afd6d2"></td>
+      <td><img src="https://github.com/alarst13/u3d/assets/49977238/9c38ce65-626b-45cb-8638-379437e27d86"></td>
+    <tr>
+    <tr>
+      <td><img src="https://github.com/alarst13/u3d/assets/49977238/0735699e-7d84-42e5-8c60-001a08d0e865"></td>
+      <td><img src="https://github.com/alarst13/u3d/assets/49977238/4cb9334f-0557-4f07-94ee-c0326816bb37"></td>
+      <td><img src="https://github.com/alarst13/u3d/assets/49977238/e03c209e-2a3c-406f-9e3b-005a92858f8b"></td>
+      <td><img src="https://github.com/alarst13/u3d/assets/49977238/fc5a42ce-079c-40d1-a4bd-8ff8ef19364f"></td>
+      <td><img src="https://github.com/alarst13/u3d/assets/49977238/4ccf9688-b889-4b56-9c4b-905c1819bd67"></td>
+      <td><img src="https://github.com/alarst13/u3d/assets/49977238/70f24f63-76eb-41e6-bc54-689b7a6ad05b"></td>
+      <td><img src="https://github.com/alarst13/u3d/assets/49977238/80f2eb85-f541-4f77-84f1-e82773f7715c"></td>
+    </tr>
+    <tr>
+      <td colspan="23">Example of a perturbed video with U3D. For greater imperceptibility, choose a smaller epsilon.</td>
+    </tr>
+  </table>
+</div>
+
+
 
 # U3D
 
