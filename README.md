@@ -44,7 +44,7 @@ bash build.sh
 
 ### Step 5: Install Python Libraries
 
-1. **Install PyTorch:** Follow the instructions on the [PyTorch official website](https://pytorch.org/get-started/locally/) to install PyTorch for your specific system and needs.
+1. **Install PyTorch:** Follow the instructions on the [PyTorch official website](https://pytorch.org/get-started/locally/) to install PyTorch for your specific system.
 
 2. **Install Additional Libraries:** Use the following command to install `numpy`, `opencv`, `tqdm`, and `scikit-learn`:
 
@@ -80,16 +80,16 @@ Move to the `dataloaders` directory inside `video_classification`:
 ```bash
 cd dataloaders
 ```
-Now, run the dataset preprocessing script:
+Now, run the dataset preprocessing script for the HMDB51 dataset:
 ```bash
-python dataset.py --dataset [DATASET_TYPE] --root_dir PATH/TO/ROOT/DIRECTORY --output_dir PATH/TO/OUTPUT/DIRECTORY
+python dataset.py --dataset h --root_dir [PATH/TO/HMDB51] --output_dir [PATH/TO/OUTPUT/DIRECTORY]
 ```
-Arguments to consider:
-- `--dataset`: Specifies the dataset name. Your options are:
-  - 'u' for UCF101 (default)
-  - 'h' for HMDB51
-- `--root_dir`: This is where you input the path to the directory of the downloaded dataset.
-- `--output_dir`: Input the path where you'd like the preprocessed dataset to be saved.
+
+Then, run the dataset preprocessing script for the UCF101 dataset:
+```bash
+python dataset.py --dataset u --root_dir [PATH/TO/UCF101] --output_dir [PATH/TO/OUTPUT/DIRECTORY]
+```
+
 
 #### **3. Download Pretrained Model for Fine-Tuning**
 
@@ -116,34 +116,37 @@ Head back to the `video_classification` directory:
 ```bash
 cd ..
 ```
-Start the model training with:
+
+Now, train the model on the HMDB51 dataset:
 ```bash
-python train.py --dataset [DATASET_TYPE] --data_org [PATH/TO/ORIGINAL/DATASET] --data_splits [PATH/TO/DATASET/SPLITS] --pretrained [PATH/TO/PRETRAINED/MODEL]
+python train.py --dataset h --data_org [PATH/TO/HMDB51] --data_splits [PATH/TO/HMDB51/SPLITS] --pretrained [PATH/TO/PRETRAINED/MODEL]
 ```
-Arguments to consider:
-- `--dataset`: Specifies the dataset name. Your options are:
-  - 'u' for UCF101 (default)
-  - 'h' for HMDB51
-- Input the path to the original downloaded dataset in place of `[PATH/TO/ORIGINAL/DATASET]`.
-- Provide the path to where the dataset splits are saved in `[PATH/TO/DATASET/SPLITS]`.
-- Replace `[PATH/TO/PRETRAINED/MODEL]` with the path to the pretrained model used for fine-tuning.
+
+Then, train the model on the UCF101 dataset:
+```bash
+python train.py --dataset u --data_org [PATH/TO/UCF101] --data_splits [PATH/TO/UCF101/SPLITS] --pretrained [PATH/TO/PRETRAINED/MODEL]
+```
+
+In the next steps, we will use the trained model on HMDB51 to optimize the attack and the trained model on UCF101 to evaluate the attack.
+
 ### Step 8: Run the Attack
+Follow these instructions to prepare data for the attack and run the attack script.
 
-1. For the final step, move to the `python/` subdirectory:
-
+1. Navigate back to the `python/` subdirectory and run the following command:
 ```bash
-cd python
+python attack_data_prep.py -d [PATH/TO/HMDB51/SPLITS] -o [PATH/TO/OUTPUT/FOLDER] -n [NUMBER/OF/RANDOM/VIDEOS]
 ```
+Please note that the actual number of generated random videos may slightly differ from your choice to maintain the original class distribution. Default is 500.
 
-2. Run the attack script without optional arguments to use default settings (to reproduce paper's results):
+2. Run the attack script without optional arguments to use default settings (for reproducing the paper's results). Use the pretrained model on HMDB51 for the attack:
 
 ```bash
-python u3d-attack-C3D.py
+python u3d-attack-C3D.py -d [PATH/TO/RANDOM/VIDEOS] -m [PATH/TO/PRETRAINED/MODEL]
 ```
 
 ### Fine-tune the Attack (Optional)
 
-If you wish to fine-tune the behavior and appearance of the perturbation during the black-box attack, you can adjust the optional arguments. Below is a guide to these arguments:
+If you wish to fine-tune the attack, you can adjust the optional arguments. Below is a guide to these arguments:
 
 **Optional Arguments:**
 
@@ -176,13 +179,30 @@ If you wish to fine-tune the behavior and appearance of the perturbation during 
 - `--epsilon`: Maximum perturbation allowed for U3D attack
 - `--alpha`: Alpha parameter for power normalization
 - `--I`: Number of iterations for sampling
-
-
+- `--dataset`: Specifies the dataset name. Your options are:
+  - 'u' for UCF101
+  - 'h' for HMDB51 (default)
 
 To use the optional arguments and customize the attack parameters, run the following command:
 
 ```bash
-python u3d-attack-C3D.py --lb <lower_bounds> --ub <upper_bounds> --swarmsize <swarm_size> --omega <omega_value> --phip <phip_value> --phig <phig_value> --maxiter <max_iterations> --T <frames_for_perlin> --epsilon <max_perturbation> --alpha <alpha_value> --I <num_iterations>
+python u3d-attack-C3D.py --lb <lower_bounds> --ub <upper_bounds> --swarmsize <swarm_size> --omega <omega_value> --phip <phip_value> --phig <phig_value> --maxiter <max_iterations> --T <frames_for_perlin> --epsilon <max_perturbation> --alpha <alpha_value> --I <num_iterations> --dataset <dataset_type>
 ```
 
-Feel free to adjust these parameters according to your requirements and desired outcomes.
+### Step 9: Evaluate the Attack
+For the final step, follow these instructions to evaluate the attack and generate the results:
+
+1. Navigate to the `noise_perturbation` directory and run `perlin_noise.py` to perform the noise perturbation on the entire UCF101 dataset using the optimized attack parameters from the previous step. The parameters are saved in `attack_params.txt`:
+
+```bash 
+cd noise_perturbation
+python perlin_noise.py -b [PATH/TO/UCF101] -o [PATH/TO/OUTPUT/FOLDER]
+```
+
+2. Navigate back to the `python/` subdirectory and run the following command to evaluate the attack:
+
+```bash
+python evaluate_attack.py --dataset u --data_org [PATH/TO/UCF101/SPLITS] --data_prt [PATH/TO/PERTURBED/UCF101/SPLITS] --model [PATH/TO/PRETRAINED/MODEL]
+```
+
+If you followed the instructions correctly, you should achieve an **84.59%** success rate on the UCF101 dataset.

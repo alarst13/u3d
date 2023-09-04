@@ -117,7 +117,7 @@ if __name__ == "__main__":
         description='Video classification using C3D model')
 
     parser.add_argument('--dataset', type=str, choices=[
-                        'u', 'h'], default='u', help='Dataset name: "u" for UCF101 or "h" for HMDB51')
+                        'u', 'h'], required=True, help='Dataset name: "u" for UCF101 or "h" for HMDB51')
 
     parser.add_argument('--data_org', type=str, required=True,
                         help='Path to the original data splits')

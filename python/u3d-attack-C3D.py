@@ -227,7 +227,7 @@ if __name__ == '__main__':
     parser.add_argument('--model', '-m', type=str, required=True,
                         help='Path to the pretrained model')
     parser.add_argument('--dataset', type=str, choices=[
-                        'u', 'h'], default='h', help='Dataset name: "u" for UCF101 or "h" for HMDB51')
+                        'u', 'h'], required=True, help='Dataset name: "u" for UCF101 or "h" for HMDB51')
     parser.add_argument('--lb', type=float, nargs=5, default=[
                         1, 2.0, 2.0, 2.0, 1.0], help='Lower bounds for optimization parameters [num_octaves (int), wavelength_x (float), wavelength_y (float), wavelength_t (float), color_period (float)]')
     parser.add_argument('--ub', type=float, nargs=5, default=[5, 180.0, 180.0, 180.0, 60.0],
