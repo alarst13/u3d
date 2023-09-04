@@ -195,8 +195,7 @@ For the final step, follow these instructions to evaluate the attack and generat
 1. Navigate to the `noise_perturbation` directory and run `perlin_noise.py` to perform the noise perturbation on the entire UCF101 dataset using the optimized attack parameters from the previous step. The parameters are saved in `attack_params.txt`:
 
 ```bash 
-cd noise_perturbation
-python perlin_noise.py -b [PATH/TO/UCF101] -o [PATH/TO/OUTPUT/FOLDER]
+cd noise_perturbation python perlin_noise.py -b [PATH/TO/UCF101] -o [PATH/TO/OUTPUT/FOLDER]
 ```
 
 2. Navigate back to the `python/` subdirectory and run the following command to evaluate the attack:
