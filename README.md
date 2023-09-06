@@ -1,13 +1,13 @@
 <div align="center">
   <table align="center">
     <tr>
-      <td><img src="https://github.com/alarst13/u3d/assets/49977238/6db8d88e-f2ab-4d70-a2ee-9409b0a899e3"></td>
-      <td><img src="https://github.com/alarst13/u3d/assets/49977238/912d488c-4b52-41da-b12a-5af7bda8296a"></td>
-      <td><img src="https://github.com/alarst13/u3d/assets/49977238/53a55aaa-3eb0-4f84-96ab-454bb52fa6fe"></td>
-      <td><img src="https://github.com/alarst13/u3d/assets/49977238/008d5e15-9041-44a1-b25f-d46ddb5e1b9c"></td>
-      <td><img src="https://github.com/alarst13/u3d/assets/49977238/cb420b46-b423-466b-bd32-d8f5dee25204"></td>
-      <td><img src="https://github.com/alarst13/u3d/assets/49977238/a02fb917-e0ef-466d-ac5e-03134a785d2b"></td>
-      <td><img src="https://github.com/alarst13/u3d/assets/49977238/6e40e649-71cc-434f-9f41-ac8bdd142597"></td>
+      <td><img src="https://github.com/alarst13/u3d/assets/49977238/c2559255-3a2e-4c21-a196-3b76d93c83c4"></td>
+      <td><img src="https://github.com/alarst13/u3d/assets/49977238/bf1b70e0-b72b-4951-9e6e-81e74149f660"></td>
+      <td><img src="https://github.com/alarst13/u3d/assets/49977238/f8cae79b-067b-4407-96a6-431dead120a5"></td>
+      <td><img src="https://github.com/alarst13/u3d/assets/49977238/4641c4e6-b0a9-4c11-9162-5e833a658bec"></td>
+      <td><img src="https://github.com/alarst13/u3d/assets/49977238/dfe1fcc6-231b-46f5-bb24-e7cc82391c6a"></td>
+      <td><img src="https://github.com/alarst13/u3d/assets/49977238/1f2a6f6e-eb3e-42f2-9efd-b5d7e3ea908e"></td>
+      <td><img src="https://github.com/alarst13/u3d/assets/49977238/4050afc3-1930-48f7-a8bb-636887f3fc07"></td>
     </tr>
     <tr>
       <td><img src="https://github.com/alarst13/u3d/assets/49977238/69b01438-8dbd-434f-8532-f9439d5629ce"></td>
@@ -19,13 +19,13 @@
       <td><img src="https://github.com/alarst13/u3d/assets/49977238/0c868631-cd67-46c3-bad1-d5b9940b7ea1"></td>
     </tr>
     <tr>
-      <td><img src="https://github.com/alarst13/u3d/assets/49977238/c2559255-3a2e-4c21-a196-3b76d93c83c4"></td>
-      <td><img src="https://github.com/alarst13/u3d/assets/49977238/bf1b70e0-b72b-4951-9e6e-81e74149f660"></td>
-      <td><img src="https://github.com/alarst13/u3d/assets/49977238/f8cae79b-067b-4407-96a6-431dead120a5"></td>
-      <td><img src="https://github.com/alarst13/u3d/assets/49977238/4641c4e6-b0a9-4c11-9162-5e833a658bec"></td>
-      <td><img src="https://github.com/alarst13/u3d/assets/49977238/dfe1fcc6-231b-46f5-bb24-e7cc82391c6a"></td>
-      <td><img src="https://github.com/alarst13/u3d/assets/49977238/1f2a6f6e-eb3e-42f2-9efd-b5d7e3ea908e"></td>
-      <td><img src="https://github.com/alarst13/u3d/assets/49977238/4050afc3-1930-48f7-a8bb-636887f3fc07"></td>
+      <td><img src="https://github.com/alarst13/u3d/assets/49977238/6db8d88e-f2ab-4d70-a2ee-9409b0a899e3"></td>
+      <td><img src="https://github.com/alarst13/u3d/assets/49977238/912d488c-4b52-41da-b12a-5af7bda8296a"></td>
+      <td><img src="https://github.com/alarst13/u3d/assets/49977238/53a55aaa-3eb0-4f84-96ab-454bb52fa6fe"></td>
+      <td><img src="https://github.com/alarst13/u3d/assets/49977238/008d5e15-9041-44a1-b25f-d46ddb5e1b9c"></td>
+      <td><img src="https://github.com/alarst13/u3d/assets/49977238/cb420b46-b423-466b-bd32-d8f5dee25204"></td>
+      <td><img src="https://github.com/alarst13/u3d/assets/49977238/a02fb917-e0ef-466d-ac5e-03134a785d2b"></td>
+      <td><img src="https://github.com/alarst13/u3d/assets/49977238/6e40e649-71cc-434f-9f41-ac8bdd142597"></td>
     </tr>
     <tr>
       <td colspan="7">Example of a perturbed video with U3D. For greater imperceptibility, choose a smaller epsilon.</td>
