@@ -28,7 +28,7 @@
       <td><img src="https://github.com/alarst13/u3d/assets/49977238/6e40e649-71cc-434f-9f41-ac8bdd142597"></td>
     </tr>
     <tr>
-      <td colspan="7">Example of a perturbed video with U3D. For greater imperceptibility, choose a smaller epsilon.</td>
+      <td colspan="7">Example of a video with imperceptibile U3D perturbation.</td>
     </tr>
   </table>
 </div>
