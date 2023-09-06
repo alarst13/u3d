@@ -28,7 +28,7 @@
       <td><img src="https://github.com/alarst13/u3d/assets/49977238/d4ffa9a9-b38d-40bf-ae53-ffef7e02bfd3"></td>
     </tr>
     <tr>
-      <td colspan="7">Example of an imperceptibly perturbed video with U3D.</td>
+      <td colspan="7">Example of imperceptible video perturbation with U3D.</td>
     </tr>
   </table>
 </div>
