@@ -234,7 +234,7 @@ For the final step, follow these instructions to evaluate the attack and generat
 
 ```bash 
 cd noise_perturbation
-python perlin_noise.py -b [PATH/TO/UCF101] -o [PATH/TO/OUTPUT/FOLDER]
+python perlin_noise.py -b [PATH/TO/UCF101/SPLITS] -o [PATH/TO/OUTPUT/FOLDER]
 ```
 
 2. Navigate back to the `python/` subdirectory and run the following command to evaluate the attack:
