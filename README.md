@@ -170,7 +170,7 @@ In the next steps, we will use the trained model on HMDB51 to optimize the attac
 ### Step 8: Run the Attack
 Follow these instructions to prepare data for the attack and run the attack script.
 
-1. Navigate back to the `python/` subdirectory and run the following command:
+1. Navigate back to the `python/` subdirectory and execute the following command to generate random videos for optimizing the attack:
 ```bash
 python attack_data_prep.py -d [PATH/TO/HMDB51/SPLITS] -o [PATH/TO/OUTPUT/FOLDER] -n [NUMBER/OF/RANDOM/VIDEOS]
 ```
