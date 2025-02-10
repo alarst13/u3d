@@ -12,3 +12,4 @@ python/video_classification/dataloaders/__pycache__
 python/datasets
 python/pretrained
 python/__pycache__
+.vscode/
